@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://polycrypt-test:8001/common/util.js"></script>
+<script src="http://polycrypt-test:8001/polycrypt.js"></script>
+<script>
+
+function go() {
+    var hello = util.str2abv("Hello world!");
+    var op = window.polycrypt.digest("SHA-256", hello);
+    op.oncomplete = function(e) {
+        console.log("complete");
+        var hex = util.abv2hex(e.target.result);
+        console.log(hex);
+        document.getElementById("hash").innerHTML = hex;
+    }
+    op.onerror = function(e) {
+        console.log("error");
+    }
+}
+window.polycrypt.onalive = go;
+
+</script>
+</head>
+
+<body style="font-family: Monospace;">
+<p>The SHA-256 hash of the string <b>"Hello world!"</b> is: <b id="hash">...</b></p>
+</body>
+</html>
+

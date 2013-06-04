@@ -49,12 +49,8 @@ TestArray.addTest(
             console.log("COMPLETE :: " + e.target.result);
             var key = e.target.result;
             that.complete(  
-                key.hasOwnProperty('type') &&
-                key.hasOwnProperty('extractable') &&
-                key.hasOwnProperty('algorithm') &&
-                key.hasOwnProperty('keyUsage') &&
-                key.hasOwnProperty('key') &&
-                key.key.length > 1024 // >4096 bits
+                key.hasOwnProperty('publicKey') &&
+                key.hasOwnProperty('privateKey')
             );
         };
     }
@@ -69,8 +65,6 @@ TestArray.addTest(
             util.hex2abv("f3095c4fe5e299477643c2310b44f0aa"),
             "AES-GCM"
         );
-        // Assuming that apiKey = f3095c4fe5e299477643c2310b44f0aa,
-        // wrappedKey = 4ee13a70ba1cc4fa2f7a21b17d36cc0a54641e49a4853704
         var that = this;
         op.onerror = function(e) {
             console.log("ERROR :: " + e.target.result);
@@ -87,6 +81,41 @@ TestArray.addTest(
                 key.hasOwnProperty('key') &&
                 key.key.length === 48 // 128+64 bits
             );
+        };
+    }
+);
+
+// -----------------------------------------------------------------------------
+TestArray.addTest(
+    "Export an RSA key",
+    function() {
+        var that = this;
+        var jwk = {
+            n: util.b64encode( tv.t7_rsa_n ),
+            e: util.b64encode( tv.t7_rsa_e ),
+            d: util.b64encode( tv.t7_rsa_d )
+        };
+        var op = window.polycrypt.importKey("jwk", jwk, "RSAES-PKCS1-v1_5");
+        op.onerror = function(e) {
+            console.log("ERROR :: " + e.target.result);
+            that.complete(false );
+        };
+        op.oncomplete = function(e) {
+            var key = e.target.result;
+            var op2 = window.polycrypt.exportKey("jwk", key);
+            op2.onerror = function(e) {
+                console.log("ERROR :: " + e.target.result);
+                that.complete(false );
+            };
+            op2.oncomplete = function(e) {
+                var jwk2 = e.target.result;
+                console.log("COMPLETE :: " + e.target.result);
+                that.complete(
+                    (jwk.n === jwk2.n)
+                    && (jwk.e === jwk2.e)
+                    && (jwk.d === jwk2.d)
+                );
+            };
         };
     }
 );

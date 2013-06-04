@@ -240,7 +240,7 @@ var libpolycrypt = {
         var data_wa = util.abv2wa(data);
 
         var ct_enc = CryptoJS.AES.encrypt(data_wa, key_wa,
-            { iv: iv_wa, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.NoPadding });
+            { iv: iv_wa, mode: CryptoJS.mode.CBC });
         return util.wa2abv(ct_enc.ciphertext);
     },
     
@@ -252,7 +252,7 @@ var libpolycrypt = {
         var ct_enc = { ciphertext: util.abv2wa(data) };
 
         var pt = CryptoJS.AES.decrypt(ct_enc, key_wa,
-            { iv: iv_wa, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.NoPadding });
+            { iv: iv_wa, mode: CryptoJS.mode.CBC });
         return util.wa2abv(pt);
     },
     

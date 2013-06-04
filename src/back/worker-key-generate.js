@@ -47,6 +47,15 @@ Impl.extend({
                 }
                 type = "secret";
                 bareKey = libpolycrypt.random(algorithm.params.length >> 3);
+                var key = {
+                    type: type,
+                    extractable: extractable,
+                    algorithm: algoName,
+                    keyUsage: keyUsages,
+                    key: bareKey,
+                }
+                key = libpolycrypt.wrap_key(this.apiKey, key);
+                this.complete(key);
                 break;
 
             case "RSAES-PKCS1-v1_5":
@@ -60,8 +69,35 @@ Impl.extend({
                 }
                 var length = algorithm.params.modulusLength;
                 var e = util.abv2hex(algorithm.params.publicExponent);
-                type = "private";
-                bareKey = libpolycrypt.rsa_generate(length, e);
+                var rsa = libpolycrypt.rsa_generate(length, e);
+                // Store key values as hex strings
+                bareKey = {};
+                for (var ix in rsa) {
+                    if ((rsa[ix].constructor == BigInteger)||(rsa[ix].constructor === Number)) {
+                        bareKey[ix] = rsa[ix].toString(16);
+                    }
+                }
+                var keyPair = {};
+                keyPair.publicKey = {
+                    type: 'public',
+                    extractable: true,
+                    algorithm: algoName,
+                    keyUsage: keyUsages,
+                    key: {
+                        n: bareKey.n,
+                        e: bareKey.e
+                    }
+                };
+                keyPair.privateKey = {
+                    type: 'private',
+                    extractable: extractable,
+                    algorithm: algoName,
+                    keyUsage: keyUsages,
+                    key: bareKey
+                }
+                keyPair.publicKey = libpolycrypt.wrap_key(this.apiKey, keyPair.publicKey);
+                keyPair.privateKey = libpolycrypt.wrap_key(this.apiKey, keyPair.privateKey);
+                this.complete(keyPair);
                 break;
 
             case "HMAC":
@@ -72,6 +108,15 @@ Impl.extend({
                 var length = algorithm.params.length;
                 type = "secret";
                 bareKey = libpolycrypt.random(length >> 3);
+                var key = {
+                    type: type,
+                    extractable: extractable,
+                    algorithm: algoName,
+                    keyUsage: keyUsages,
+                    key: bareKey,
+                }
+                key = libpolycrypt.wrap_key(this.apiKey, key);
+                this.complete(key);
                 break;
 
             default:
@@ -80,15 +125,6 @@ Impl.extend({
        
         // XXX-SPEC: The spec is inconsistent between keyUsage[s]
         // XXX-SPEC: Algorithm comes in with KeyGenParams; what should go out?
-        var key = {
-            type: type,
-            extractable: extractable,
-            algorithm: algoName,
-            keyUsage: keyUsages,
-            key: bareKey,
-        }
-        key = libpolycrypt.wrap_key(this.apiKey, key);
-        this.complete(key);
     },
 
 });

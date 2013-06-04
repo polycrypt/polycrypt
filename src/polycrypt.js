@@ -5,8 +5,8 @@ var polycrypt = (function polycrypt() {
     nextOpId = 0,  // a UID for each object this function instantiates
 
     // vars for dealing with the polycrypt backend
-    backendSource = "http://localhost:8001/back/back.html",
-    backendOrigin = "http://localhost:8001",
+    backendSource = "http://polycrypt-test:8001/back/back.html",
+    backendOrigin = "http://polycrypt-test:8001",
     backendFrame,
     backend = null,
     handleAlive;
@@ -45,7 +45,6 @@ var polycrypt = (function polycrypt() {
     function Messenger(op, setResult) {
         // For event handling
         var listeners = {},
-        lastEvent = {},
         // For back-end messaging
         myOpid = nextOpId++,
         myBackend = backend,
@@ -63,10 +62,6 @@ var polycrypt = (function polycrypt() {
             }
             listeners[type].push(listener);
             // We ignore useCapture, because we're not in the DOM
-
-            if (lastEvent[type]) {
-                _fireListener(listener, lastEvent[type]);
-            }
         };
 
         this.removeEventListener = function M_removeEventListener(type, listener, useCapture) {
@@ -77,11 +72,12 @@ var polycrypt = (function polycrypt() {
         this.dispatchEvent = function M_dispatchEvent(e) {
             console.log("TRACE Entered M_dispatchEvent");
             e.target = op;
-            for (var l in listeners[e.type]) {
-                _fireListener(listeners[e.type][l], e);
+            var fire = function(l, e) {
+                return function() { _fireListener(l, e); }
             }
-
-            lastEvent[e.type] = e;
+            for (var l in listeners[e.type]) {
+                setTimeout( fire(listeners[e.type][l], e), 0 );
+            }
         };
         
         this.postMessage = function M_postMessage(method, args) {
@@ -332,7 +328,7 @@ var polycrypt = (function polycrypt() {
     };
     
     me.exportKey = function pc_exportKey(format, key) {
-        return createKeyOp('export', format, null, null, null, null, null, null, null, key);
+        return createKeyOp('export', format, null, null, null, null, null, null, key);
     };
 
     //--------------------------------------------------------------------------

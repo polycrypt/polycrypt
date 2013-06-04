@@ -1,0 +1,89 @@
+body {
+	font-family: Helvetica Neue, Helvetica, Trebuchet MS, Sans-serif;
+	font-size: 12pt;
+	text-align: center;
+    background-color: white;
+    color: black;
+}
+
+#content {
+	width: 50em;
+	margin: 0 auto 0 auto;
+}
+
+#head {
+	font-family: Helvetica Neue, Helvetica, Trebuchet MS, Sans-serif;
+	font-size: 300%;
+	font-weight: lighter;
+	padding: .2ex;
+	padding-bottom: 0ex;
+	margin-bottom: .5ex;
+	border-bottom: 10px solid #b0b;
+    text-align: left;
+}
+#head b {
+	font-weight: bold;
+	color: #b0b;
+}
+
+#content p, #content table {
+    width: 30em;
+    margin: 0.5em auto 0.5em auto;
+    padding: 1em;
+    border: 1px solid #b0b;
+}
+
+#content table input {
+    font-family: Helvetica Neue, Helvetica, Trebuchet MS, Sans-serif;
+    font-size: 12pt;
+    background-color: white;
+    border: 1px solid #b0b;
+    color: black;
+}
+
+
+.disabled {
+    border: 1px solid #ccc;
+    color: #ccc
+}
+
+.off {
+    color: white;
+}
+
+.working {
+    color: #b0b;
+}
+
+.on {
+    background-color: #b0b;
+    color: white;
+}
+
+.hidden {
+    display: none;
+}
+
+#results {
+    width: 20em;
+    margin: 0.5em auto 0.5em auto;
+    background-color: #b0b;
+}
+
+#done th {
+    color: white;
+}
+
+#done td {
+    height: 3em;
+    border: 1px solid #b0b;
+    background-color: white;
+    text-align: center;
+    font-weight: bold;
+}
+
+#done td a {
+    color: #b0b;
+    text-decoration: none;
+}
+

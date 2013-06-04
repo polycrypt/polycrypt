@@ -52,7 +52,7 @@ WorkerDelegate.prototype = {
             args: { type: this.type, },
         });
     },
-
+    
     get apiKey() {
         var apiKeyField = "apiKey";
         if (!(apiKeyField in window.localStorage)) {

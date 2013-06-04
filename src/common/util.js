@@ -11,14 +11,14 @@ var util = {
         return  (
             (x instanceof Int8Array) ||
             (x instanceof Uint8Array) ||
-            (x instanceof Uint8ClampedArray) ||
             (x instanceof Int16Array) ||
             (x instanceof Uint16Array) ||
             (x instanceof Int32Array) ||
             (x instanceof Uint32Array) ||
             (x instanceof Float32Array) ||
             (x instanceof Float64Array) ||
-            (('buffer' in x) && ('byteLength' in x) && ('byteOffset' in x))
+            ((typeof(x) == 'object') && ('buffer' in x) && 
+             ('byteLength' in x) && ('byteOffset' in x))
         );
     },
 
@@ -67,7 +67,10 @@ var util = {
 
     // Convert a hex string to an ArrayBufferView
     hex2abv: function util_hex2abv(hex) {
-        this.assert( hex.length % 2 === 0 );
+        if (hex.length % 2 !== 0) {
+            hex = "0" + hex;
+        }
+
         var abv = new Uint8Array(hex.length / 2);
         for (var i=0; i<abv.length; ++i) {
             abv[i] = parseInt(hex.substr(2*i, 2), 16);
@@ -182,8 +185,8 @@ var util = {
     abvsplit: function util_abvsplit(abv, i) {
         var abv8 = this.abv2u8(abv);
         return [
-            new Uint8Array( abv8.buffer.slice(0,i) ),
-            new Uint8Array( abv8.buffer.slice(i) )
+            this.abv2u8( abv8.subarray(0,i) ),
+            this.abv2u8( abv8.subarray(i) )
         ];
     }
 };

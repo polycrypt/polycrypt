@@ -100,16 +100,18 @@ t12_sig     = "558af496a9900ec497a51723a0bf1be167a3fdd0e40c95764575bcc93d35d4159
 
 # 13. AES CBC encrypt
 # Test vector from RFC 3602, Case 2 <http://tools.ietf.org/html/rfc3602#section-5>
+# ... with the addition of PKCS#7 padding
 t13_key     = "c286696d887c9aa0611bbb3e2025a45a"
 t13_iv      = "562e17996d093d28ddb3ba695a2e6f58"
 t13_data    = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
-t13_result  = "d296cd94c2cccf8a3a863028b5e1dc0a7586602d253cfff91b8266bea6d61ab1"
+t13_result  = "d296cd94c2cccf8a3a863028b5e1dc0a7586602d253cfff91b8266bea6d61ab1bcfd81022202366bde6dd260a15841a1"
 
 # 14. AES CBC decrypt
 # Test vector from RFC 3602, Case 4 <http://tools.ietf.org/html/rfc3602#section-5>
+# ... with the addition of PKCS#7 padding
 t14_key     = "56e47a38c5598974bc46903dba290349"
 t14_iv      = "8ce82eefbea0da3c44699ed7db51b7d9"
-t14_data    = "c30e32ffedc0774e6aff6af0869f71aa0f3af07a9a31a9c684db207eb0ef8e4e35907aa632c3ffdf868bb7b29d3d46ad83ce9f9a102ee99d49a53e87f4c3da55"
+t14_data    = "c30e32ffedc0774e6aff6af0869f71aa0f3af07a9a31a9c684db207eb0ef8e4e35907aa632c3ffdf868bb7b29d3d46ad83ce9f9a102ee99d49a53e87f4c3da5578b8d04731041aa2d9787ca4a4fa3eef"
 t14_result  = "a0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
 
 # 15. AES CTR encrypt

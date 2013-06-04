@@ -9,13 +9,13 @@ py: testvectors py/*
 
 js: testvectors js/*
 	cp -R ${JS_SRC}/back/lib js/
-	mkdir js/src
+	mkdir -p js/src
 	cp ${JS_SRC}/back/libpolycrypt.js js/src/.
 	cp ${JS_SRC}/common/util.js js/src/.
 	cd js && java -jar ${RHINO_HOME}/js.jar test.js	
 
-c: testvectors c/*
-	gcc c/test.c -o c/test
+c: testvectors
+	make -C c
 	./c/test
 
 testvectors: TestVectors.in
