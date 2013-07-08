@@ -119,7 +119,7 @@ var polycrypt = (function polycrypt() {
             if (!msg.hasOwnProperty('opid') || (msg.opid !== myOpid)) { return; }
             
             // If the message has a result, cache it
-            if (msg.result) {
+            if (typeof(msg.result) !== "undefined") {
                 setResult(msg.result);
                 console.log('_handleMessage delivered result: ' + JSON.stringify(msg.result));
             }
