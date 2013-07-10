@@ -141,7 +141,14 @@ Impl.extend({
                         hash = libpolycrypt.hmac_sha256(this.key.key, data);
                         break;
                 }
-                ver = (hash == this.signature);
+                if (hash.length != this.signature.length) {
+                    if (hash.length < this.signature.length) {
+                        this.die('Signature has too many bytes');
+                    }
+                    var subSig = hash.subarray(0, this.signature.length);
+                    ver = (subSig == this.signature);
+                }
+                else ver = (hash == this.signature);
                 break;
 
             case 'RSASSA-PKCS1-v1_5':
