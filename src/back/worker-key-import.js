@@ -36,6 +36,7 @@ Impl.extend({
             case "AES-CTR":
             case "AES-CBC":
             case "AES-GCM":
+            case "AES-KW":
             case "HMAC":
                 if (format !== 'raw') {
                     this.die('Only raw key supported for algorithm ' + algoName);

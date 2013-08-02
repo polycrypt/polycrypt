@@ -106,6 +106,13 @@ Impl.extend({
                 }
                 break;
 
+            case 'AES-KW':
+                //  key type
+                if (this.key.type !== 'secret') {
+                    this.die('Key must be a secret / symmetric key');
+                }
+                break;
+
             case 'RSAES-PKCS1-v1_5':
                 // Need to have private key fields
                 if (!this.key.key.hasOwnProperty('n') ||
@@ -174,6 +181,14 @@ Impl.extend({
                         this.algorithm.params.additionalData,
                         CT[1]
                     );
+                } catch (e) {
+                    this.die('Decryption integrity check failed');
+                }
+                break;
+
+            case 'AES-KW':
+                try {
+                    pt = libpolycrypt.aes_key_unwrap(this.key.key, data);
                 } catch (e) {
                     this.die('Decryption integrity check failed');
                 }

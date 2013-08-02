@@ -107,6 +107,12 @@ Impl.extend({
                 }
                 break;
 
+            case 'AES-KW':
+                if (this.key.type !== 'secret') {
+                    this.die('Key must be a secret / symmetric key');
+                }
+                break;
+
             case 'RSAES-PKCS1-v1_5':
                 // Need to have public key fields
                 if (!this.key.key.hasOwnProperty('n') || !this.key.key.hasOwnProperty('e')) {
@@ -171,6 +177,12 @@ Impl.extend({
                     this.algorithm.params.tagLength
                 );
                 ct = util.abvcat(CT.C, CT.T);
+                break;
+
+            case 'AES-KW':
+                ct = libpolycrypt.aes_key_wrap(
+                    this.key.key,
+                    data);
                 break;
 
             case 'RSAES-PKCS1-v1_5':
