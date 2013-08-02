@@ -1,0 +1,425 @@
+<!DOCTYP HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"/>
+<html>
+  <head>
+    <title>Test page for JOSE</title>
+    <script type="text/javascript" src="./json_parse.js"></script>
+    <script type="text/javascript" src="./json_stringify.js"></script>
+    <script type="text/javascript" src="http://polycrypt.net/common/util.js"></script>
+    <script type="text/javascript" src="http://polycrypt.net/polycrypt.js"></script>
+    <script type="text/javascript" src="http://test.polycrypt.net/promise/q.js"></script>
+    <script type="text/javascript" src="./promisecrypt.js"></script>
+    <script type="text/javascript" src="./base64.js"></script>
+    <script type="text/javascript" src="./jose.js"></script>
+    <script type="text/javascript" src="./jose-jws.js"></script>
+
+    <script type="text/javascript">
+      function JWS_Test1()
+      {
+          var A1_1_Compact = "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
+
+          var test1 = JOSE.ParseFromCompacted(A1_1_Compact);
+
+          var jwk = { kty:"oct" };
+
+          var keyVal = new Uint8Array( [3, 35, 53, 75, 43, 15, 165, 188, 131, 126, 6, 101, 119, 123, 166,
+   143, 90, 179, 40, 230, 240, 84, 201, 40, 169, 15, 132, 178, 210, 80,
+   46, 191, 211, 251, 90, 146, 210, 6, 71, 239, 150, 138, 180, 195, 119,
+   98, 61, 34, 61, 46, 33, 114, 5, 46, 79, 8, 192, 205, 154, 245, 103,
+   208, 128, 163] );
+
+          jwk["k"] = util.b64encode(keyVal); 
+
+          test1.Verify(
+              function fnFindKey( header, algorithm ) {
+                  var k = util.b64decode(jwk['k']);
+                  return window.promisecrypt.importKey("raw", k, "HMAC").then(
+                      function(x) {console.log.bind(console, "ImportKey Succeeded"); return x; },
+                      console.error.bind(console, "ImportKey Failed")
+                  );
+              }
+          ).then( function fnPrint( x ) {
+              var f = true;
+              for (var i=0; i<test1.signers().length; i++) {
+                  console.log("Signature # " + i + " result is " + test1.signers()[i].result);
+                  if (test1.signers()[i].result == false) f = false;
+              };
+              document.getElementById("JOSE1").innerHTML = f;
+          }
+          );
+      }
+
+      function JWS_Test2()
+      {
+          console.log("Start JWS_Test2");
+          var A1_2_Compact = "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.cC4hiUPoj9Eetdgtv3hF80EGrhuB__dzERat0XF9g2VtQgr9PJbu3XOiZj5RZmh7AAuHIm4Bh-0Qc_lF5YKt_O8W2Fp5jujGbds9uJdbF9CUAr7t1dnZcAcQjbKBYNX4BAynRFdiuB--f_nZLgrnbyTyWzO75vRK5h6xBArLIARNPvkSjtQBMHlb1L07Qe7K0GarZRmB_eSN9383LcOLn6_dO--xi12jzDwusC-eOkHWEsqtFZESc6BfI7noOPqvhJ1phCnvWh6IeYI2w9QOYEUipUTI8np6LbgGY9Fs98rqVt5AXLIhWkWywlVmtVrBp0igcN_IoypGlUPQGe77Rw";
+
+          var Modulus = [161, 248, 22, 10, 226, 227, 201, 180, 101, 206, 141,  
+                 45, 101, 98, 99, 54, 43, 146, 125, 190, 41, 225, 240,  
+                 36, 119, 252, 22, 37, 204, 144, 161, 54, 227, 139,     
+                 217, 52, 151, 197, 182, 234, 99, 221, 119, 17, 230,    
+                 124, 116, 41, 249, 86, 176, 251, 138, 143, 8, 154,     
+                 220, 75, 105, 137, 60, 193, 51, 63, 83, 237, 208, 25,  
+                 184, 119, 132, 37, 47, 236, 145, 79, 228, 133, 119,    
+                 105, 89, 75, 234, 66, 128, 211, 44, 15, 85, 191, 98,   
+                 148, 79, 19, 3, 150, 188, 110, 155, 223, 110, 189,     
+                 210, 189, 163, 103, 142, 236, 160, 198, 104, 247, 1,   
+                 179, 141, 191, 251, 56, 200, 52, 44, 226, 254, 109,    
+                 39, 250, 222, 74, 90, 72, 116, 151, 157, 212, 185,     
+                 207, 154, 222, 196, 199, 91, 5, 133, 44, 44, 15, 94,   
+                 248, 165, 193, 117, 3, 146, 249, 68, 232, 237, 100,    
+                 193, 16, 198, 182, 71, 96, 154, 164, 120, 58, 235,     
+                 156, 108, 154, 215, 85, 49, 48, 80, 99, 139, 131,      
+                 102, 92, 111, 111, 122, 130, 163, 150, 112, 42, 31,    
+                 100, 27, 130, 211, 235, 242, 57, 34, 25, 73, 31, 182,  
+                 134, 135, 44, 87, 22, 245, 10, 248, 53, 141, 154,      
+                 139, 157, 23, 195, 64, 114, 143, 127, 135, 216, 154,   
+                 24, 216, 252, 171, 103, 173, 132, 89, 12, 46, 207,     
+                 117, 147, 57, 54, 60, 7, 3, 77, 111, 96, 111, 158,     
+                 33, 224, 84, 86, 202, 229, 233, 161]                   ;
+          var Exponent=    [1, 0, 1]                                              ;
+
+
+          var test1 = JOSE.ParseFromCompacted(A1_2_Compact);
+
+          var jwk = { kty:"rsa" };
+          jwk["n"] = util.b64encode(new Uint8Array(Modulus)); 
+          jwk["e"] = util.b64encode(new Uint8Array(Exponent)); 
+
+          test1.Verify(
+              function fnFindKey( header, algorithm ) {
+
+                  return window.promisecrypt.importKey("jwk", jwk, "RSASSA-PKCS1-v1_5").then(
+                      function(x) {console.log.bind(console, "ImportKey Succeeded"); return x; },
+                      console.error.bind(console, "ImportKey Failed")
+                  );
+
+              }
+          ).then( function fnPrint( x ) {
+              var f = true;
+              for (var i=0; i<test1.signers().length; i++) {
+                  console.log("Signature # " + i + " result is " + test1.signers()[i].result);
+                  if (test1.signers()[i].result == false) f = false;
+              };
+              document.getElementById("JOSE2").innerHTML = f;
+              },
+              console.error.bind(console, "JWS_Test2 fail")
+          );
+      }
+
+      function JWS_Test1_Encode()
+      {
+          console.log("JWS_test3 Start");
+          var jws = new JOSE.JWS();
+          var keyVal = new Uint8Array( [3, 35, 53, 75, 43, 15, 165, 188, 131, 126, 6, 101, 119, 123, 166,
+   143, 90, 179, 40, 230, 240, 84, 201, 40, 169, 15, 132, 178, 210, 80,
+   46, 191, 211, 251, 90, 146, 210, 6, 71, 239, 150, 138, 180, 195, 119,
+   98, 61, 34, 61, 46, 33, 114, 5, 46, 79, 8, 192, 205, 154, 245, 103,
+   208, 128, 163] );
+
+          window.promisecrypt.importKey("raw", keyVal, "HMAC").then(
+              function(key) {
+                  jws.AddSigner(key, "HS256");
+                  jws.SetHeader(0, "typ", "JWT");
+                  jws.SetContent("{\"iss\":\"joe\",\r\n \"exp\":1300819380,\r\n \"http://example.com/is_root\":true}", true);
+                  jws.Sign(true).then(
+                      function(x) {
+                         var a = jws.GetJSON(true);
+                          document.getElementById("JOSE1_Encode").innerHTML = a;
+
+                         if (jws.GetCompactEncoding() == checkValue) console.log("JWS_Test3 Passes");
+                         else console.log("JWS_test3 Fails");
+                      },
+                      console.error.bind(console, "JWS_Test3 fail")
+                  )
+              },
+              console.error.bind(console, "JWS_Test3 fail")
+          )
+      }
+
+
+      function JWS_Test3_Decode()
+      {
+          var A1_1_Compact = "eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.DtEhU3ljbEg8L38VWAfUAqOyKAM6-Xx-F4GawxaepmXFCgfTjDxw5djxLa8ISlSApmWQxfKTUJqPP3-Kg6NU1Q";
+
+           var x = new Uint8Array(         [127, 205, 206, 39, 112, 246, 196, 93, 65, 131, 203,  
+               238, 111, 219, 75, 123, 88, 7, 51, 53, 123, 233, 239, 
+               19, 186, 207, 110, 60, 123, 209, 84, 69] );
+          var y = new Uint8Array( [199, 241, 68, 205, 27, 189, 155, 126, 135, 44, 223,  
+               237, 185, 238, 185, 244, 179, 105, 93, 110, 169, 11,  
+               36, 173, 138, 70, 35, 40, 133, 136, 229, 173])   ;      
+          var d = [142, 155, 16, 158, 113, 144, 152, 191, 152, 4, 135,  
+               223, 31, 93, 119, 233, 203, 41, 96, 110, 190, 210,    
+               38, 59, 95, 87, 194, 19, 223, 132, 244, 178]   ;       
+
+          var test1 = JOSE.ParseFromCompacted(A1_1_Compact);
+
+          var jwk = { kty:"EC", crv:"P-256" };
+          jwk["x"] = util.b64encode(x);
+          jwk["y"] = util.b64encode(y);
+
+          test1.Verify(
+              function fnFindKey( header, algorithm ) {
+                  return window.promisecrypt.importKey("jwk", jwk, "ECDSA").then(
+                      function(x) {console.log.bind(console, "ImportKey Succeeded"); return x; },
+                      function(x) {console.error("JWS_Test3_Decode: ImportKey Failed");
+                                   document.getElementById("JOSE3").innerHTML = "ImportKey Failed";
+                                  }
+                  );
+              }
+          ).then( function fnPrint( x ) {
+              var f = true;
+              for (var i=0; i<test1.signers().length; i++) {
+                  console.log("Signature # " + i + " result is " + test1.signers()[i].result);
+                  if (test1.signers()[i].result == false) f = false;
+              };
+              document.getElementById("JOSE3").innerHTML = f;
+          }
+          );
+      }
+
+      function JWS_Test5_Decode()
+      {
+          var A1_1_Compact = "eyJhbGciOiJFUzUxMiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.AdwMgeerwtHoh-l192l60hp9wAHZFVJbLfD_UxMi70cwnZOYaRI1bKPWROc-mZZqwqT2SI-KGDKB34XO0aw_7XdtAG8GaSwFKdCAPZgoXD2YBJZCPEX3xKpRwcdOO8KpEHwJjyqOgzDO7iKvU8vcnwNrmxYbSW9ERBXukOXolLzeO_Jn";
+
+          var x = new Uint8Array(          [1, 233, 41, 5, 15, 18, 79, 198, 188, 85, 199, 213,   
+               57, 51, 101, 223, 157, 239, 74, 176, 194, 44, 178,    
+               87, 152, 249, 52, 235, 4, 227, 198, 186, 227, 112,    
+               26, 87, 167, 145, 14, 157, 129, 191, 54, 49, 89, 232, 
+               235, 203, 21, 93, 99, 73, 244, 189, 182, 204, 248,    
+               169, 76, 92, 89, 199, 170, 193, 1, 164]               );
+          var y = new Uint8Array(          [0, 52, 166, 68, 14, 55, 103, 80, 210, 55, 31, 209,   
+               189, 194, 200, 243, 183, 29, 47, 78, 229, 234, 52,    
+               50, 200, 21, 204, 163, 21, 96, 254, 93, 147, 135,     
+               236, 119, 75, 85, 131, 134, 48, 229, 203, 191, 90,    
+               140, 190, 10, 145, 221, 0, 100, 198, 153, 154, 31,    
+               110, 110, 103, 250, 221, 237, 228, 200, 200, 246]     );
+
+          var test1 = new JOSE.JWS(A1_1_Compact);
+
+          var jwk = { kty:"EC", crv:"P-512" };
+          jwk["x"] = util.b64encode(x);
+          jwk["y"] = util.b64encode(y);
+
+          test1.Verify(
+              function fnFindKey( header, algorithm ) {
+                  var k = util.b64decode(jwk['k']);
+                  return window.promisecrypt.importKey("jwk", jwk, "ECDSA").then(
+                      function(x) {console.log.bind(console, "ImportKey Succeeded"); return x; },
+                      console.error.bind(console, "ImportKey Failed")
+                  );
+              }
+          ).then( function fnPrint( x ) {
+              var f = true;
+              for (var i=0; i<test1.signers().length; i++) {
+                  console.log("Signature # " + i + " result is " + test1.signers()[i].result);
+                  if (test1.signers()[i].result == false) f = false;
+              };
+              document.getElementById("JOSE3").innerHTML = f;
+          }
+          );
+      }
+
+      function JWS_Test6_Decode()
+      {
+          var A1_1_Compact =
+     "{\"protected\":\"eyJhbGciOiJSUzI1NiJ9\",\"payload\":\"eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ\",\"signatures\":[{\"header\":{\"kid\":\"2010-12-29\"},\"signature\":\"cC4hiUPoj9Eetdgtv3hF80EGrhuB__dzERat0XF9g2VtQgr9PJbu3XOiZj5RZmh7AAuHIm4Bh-0Qc_lF5YKt_O8W2Fp5jujGbds9uJdbF9CUAr7t1dnZcAcQjbKBYNX4BAynRFdiuB--f_nZLgrnbyTyWzO75vRK5h6xBArLIARNPvkSjtQBMHlb1L07Qe7K0GarZRmB_eSN9383LcOLn6_dO--xi12jzDwusC-eOkHWEsqtFZESc6BfI7noOPqvhJ1phCnvWh6IeYI2w9QOYEUipUTI8np6LbgGY9Fs98rqVt5AXLIhWkWywlVmtVrBp0igcN_IoypGlUPQGe77Rw\"},{\"header\":{\"kid\":\"e9bc097a-ce51-4036-9562-d2ade882db0d\"},\"signature\":\"m2nhGPQGjPEDIotJnzcnlhUZnXeg0xzLVbh6NZzthY8yU3klJYaENE1aLAUtLcq-TmEeYIr30ruGH2kNFqW4-oc7LcTQu9-7ItRhfi0kKeN1zNAAUemfNYXaXA1JayiiCl7m9ylhLKIsvdXhFvV7XDSbUMnVoO9Yu5_ROKOJMkeU6ywR8DDcHmuB2KcLMfpHn1FqnUnojxwfOg1Eqyb_ppeDTm9t_h8FoQgHqRpNgsTTvxI9vSPEZrWTkSf_D4ci6p06DM_nE6FbptYF3ENHF8NpGgncv_D_h9AIrZU5-6ee2HB24jtN9qOHw2pkVrvhtxdsSJdeG6uJqiFs0ArwQQ\"}]}";
+
+
+          var x = new Uint8Array(          [1, 233, 41, 5, 15, 18, 79, 198, 188, 85, 199, 213,   
+               57, 51, 101, 223, 157, 239, 74, 176, 194, 44, 178,    
+               87, 152, 249, 52, 235, 4, 227, 198, 186, 227, 112,    
+               26, 87, 167, 145, 14, 157, 129, 191, 54, 49, 89, 232, 
+               235, 203, 21, 93, 99, 73, 244, 189, 182, 204, 248,    
+               169, 76, 92, 89, 199, 170, 193, 1, 164]               );
+          var y = new Uint8Array(          [0, 52, 166, 68, 14, 55, 103, 80, 210, 55, 31, 209,   
+               189, 194, 200, 243, 183, 29, 47, 78, 229, 234, 52,    
+               50, 200, 21, 204, 163, 21, 96, 254, 93, 147, 135,     
+               236, 119, 75, 85, 131, 134, 48, 229, 203, 191, 90,    
+               140, 190, 10, 145, 221, 0, 100, 198, 153, 154, 31,    
+               110, 110, 103, 250, 221, 237, 228, 200, 200, 246]     );
+
+          var jwks = {
+              keys:[
+                  { ctyp:"RSA", n:util.b64encode(new Uint8Array(
+                          [160, 120, 137, 109, 191, 13, 24, 29, 15, 217, 68,    
+               35, 164, 152, 33, 179, 62, 22, 51, 134, 60, 228, 112, 
+               172, 11, 62, 57, 16, 26, 162, 213, 250, 199, 183, 56, 
+               103, 101, 172, 20, 178, 226, 124, 116, 135, 195, 195, 
+               124, 91, 174, 65, 218, 196, 113, 82, 132, 161, 145,   
+               71, 8, 117, 240, 109, 116, 40, 196, 26, 174, 135, 43, 
+               175, 40, 166, 223, 157, 5, 188, 92, 7, 52, 219, 11,   
+               157, 96, 99, 25, 65, 151, 108, 25, 104, 206, 147, 63, 
+               1, 157, 154, 58, 111, 200, 251, 54, 202, 96, 220, 42, 
+               196, 21, 252, 193, 58, 205, 44, 89, 217, 58, 164, 99, 
+               3, 76, 195, 180, 76, 19, 103, 110, 26, 2, 122, 173,   
+               211, 45, 218, 134, 212, 26, 198, 156, 110, 213, 139,  
+               31, 135, 227, 43, 0, 45, 192, 39, 206, 176, 194, 154, 
+               217, 10, 185, 227, 143, 142, 179, 117, 171, 238, 187, 
+               88, 12, 185, 36, 110, 100, 76, 34, 39, 20, 145, 184,  
+               44, 14, 100, 21, 77, 15, 82, 150, 53, 156, 46, 196,   
+               231, 156, 152, 152, 85, 145, 184, 195, 213, 134, 107, 
+               75, 10, 117, 233, 76, 215, 62, 205, 95, 170, 6, 234,  
+               221, 139, 4, 241, 239, 203, 28, 32, 95, 192, 24, 164, 
+               172, 132, 10, 193, 239, 45, 140, 153, 198, 140, 117,  
+               17, 223, 12, 26, 5, 47, 223, 211, 151, 120, 15, 230,  
+               60, 42, 51, 104, 119, 46, 41, 242, 177, 76, 33]       )),
+                    e:util.b64encode(new Uint8Array(   [1, 0, 1] ))
+                  , kid:"e9bc097a-ce51-4036-9562-d2ade882db0d"
+                    },
+                  { ctyp:"RSA",
+                    n: util.b64encode(new Uint8Array( [161, 248, 22, 10, 226, 227, 201, 180, 101, 206, 141,  
+                 45, 101, 98, 99, 54, 43, 146, 125, 190, 41, 225, 240,  
+                 36, 119, 252, 22, 37, 204, 144, 161, 54, 227, 139,     
+                 217, 52, 151, 197, 182, 234, 99, 221, 119, 17, 230,    
+                 124, 116, 41, 249, 86, 176, 251, 138, 143, 8, 154,     
+                 220, 75, 105, 137, 60, 193, 51, 63, 83, 237, 208, 25,  
+                 184, 119, 132, 37, 47, 236, 145, 79, 228, 133, 119,    
+                 105, 89, 75, 234, 66, 128, 211, 44, 15, 85, 191, 98,   
+                 148, 79, 19, 3, 150, 188, 110, 155, 223, 110, 189,     
+                 210, 189, 163, 103, 142, 236, 160, 198, 104, 247, 1,   
+                 179, 141, 191, 251, 56, 200, 52, 44, 226, 254, 109,    
+                 39, 250, 222, 74, 90, 72, 116, 151, 157, 212, 185,     
+                 207, 154, 222, 196, 199, 91, 5, 133, 44, 44, 15, 94,   
+                 248, 165, 193, 117, 3, 146, 249, 68, 232, 237, 100,    
+                 193, 16, 198, 182, 71, 96, 154, 164, 120, 58, 235,     
+                 156, 108, 154, 215, 85, 49, 48, 80, 99, 139, 131,      
+                 102, 92, 111, 111, 122, 130, 163, 150, 112, 42, 31,    
+                 100, 27, 130, 211, 235, 242, 57, 34, 25, 73, 31, 182,  
+                 134, 135, 44, 87, 22, 245, 10, 248, 53, 141, 154,      
+                 139, 157, 23, 195, 64, 114, 143, 127, 135, 216, 154,   
+                 24, 216, 252, 171, 103, 173, 132, 89, 12, 46, 207,     
+                 117, 147, 57, 54, 60, 7, 3, 77, 111, 96, 111, 158,     
+                 33, 224, 84, 86, 202, 229, 233, 161]                  )),
+                    e: util.b64encode(new Uint8Array(   [1, 0, 1] )),
+                    kid: "2010-12-29"
+                  }
+              ]
+              };
+
+          var test1 = new JOSE.JWS(A1_1_Compact);
+
+          test1.Verify(
+              function fnFindKey( header, algorithm ) {
+                  var kid = header.GetHeader("kid");
+                  for (var i=0; i<jwks.keys.length; i++) {
+                      if (jwks.keys[i].kid == kid) {
+                          return window.promisecrypt.importKey("jwk", jwks.keys[i], algorithm["name"]).then(
+                              function(x) {console.log.bind(console, "ImportKey Succeeded"); return x; },
+                      function(x) {console.error("JWS_Test6_Decode: ImportKey Failed");
+                                   document.getElementById("JOSE6").innerHTML = "ImportKey Failed";
+                                  }
+                          );
+                      }
+                  }
+                  
+                  document.getElementById("JOSE6").innerHTML = "No Key Found";
+                  return null;
+              }
+          ).then( function fnPrint( x ) {
+              var f = true;
+              for (var i=0; i<test1.signers().length; i++) {
+                  console.log("Signature # " + i + " result is " + test1.signers()[i].result);
+                  if (test1.signers()[i].result == false) f = false;
+              };
+              document.getElementById("JOSE6").innerHTML = f;
+          }
+          );
+      }
+
+      window.polycrypt.onalive = function()
+      {
+          JWS_Test1();
+          JWS_Test1_Encode();
+          JWS_Test2();
+          JWS_Test3_Decode();
+          JWS_Test6_Decode();
+      }
+
+      function fred()
+      {
+          var test1String = "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.OKOawDo13gRp2ojaHV7LFpZcgV7T6DVZKTyKOMTYUmKoTCVJRgckCL9kiMT03JGeipsEdY3mx_etLbbWSrFr05kLzcSr4qKAq7YN7e9jwQRb23nfa6c9d-StnImGyFDbSv04uVuxIp5Zms1gNxKKK2Da14B8S4rzVRltdYwam_lDp5XnZAYpQdb76FdIKLaVmqgfwX7XWRxv2322i-vDxRfqNzo_tETKzpVLzfiwQyeyPGLBIO56YJ7eObdv0je81860ppamavo35UgoRdbYaBcoh9QcfylQr66oc6vFWXRcZ_ZT2LawVCWTIy3brGPi6UklfCpIMfIjf7iGdXKHzg.48V1_ALb6US04U3b.5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6jiSdiwkIr3ajwQzaBtQD_A.XFBoMYUZodetZdvTiFvSkQ"
+
+          var keyData = {
+              "kty": "RSA",
+              "n" : "",
+              "e" : "",
+              "d" : ""
+           };
+
+          var n = new [161, 168, 84, 34, 133, 176, 208, 173, 46, 176, 163,
+                 110, 57, 30, 135, 227, 9, 31, 226, 128, 84, 92, 116, 
+                 241, 70, 248, 27, 227, 193, 62, 5, 91, 241, 145, 224,
+                 205, 141, 176, 184, 133, 239, 43, 81, 103, 9, 161,   
+                 153, 157, 179, 104, 123, 51, 189, 34, 152, 69, 97,   
+                 69, 78, 93, 140, 131, 87, 182, 169, 101, 92, 142, 3, 
+                 22, 167, 8, 212, 56, 35, 79, 210, 222, 192, 208, 252,
+                 49, 109, 138, 173, 253, 210, 166, 201, 63, 102, 74,  
+                 5, 158, 41, 90, 144, 108, 160, 79, 10, 89, 222, 231, 
+                 172, 31, 227, 197, 0, 19, 72, 81, 138, 78, 136, 221, 
+                 121, 118, 196, 17, 146, 10, 244, 188, 72, 113, 55,   
+                 221, 162, 217, 171, 27, 57, 233, 210, 101, 236, 154, 
+                 199, 56, 138, 239, 101, 48, 198, 186, 202, 160, 76,  
+                 111, 234, 71, 57, 183, 5, 211, 171, 136, 126, 64, 40,
+                 75, 58, 89, 244, 254, 107, 84, 103, 7, 236, 69, 163, 
+                 18, 180, 251, 58, 153, 46, 151, 174, 12, 103, 197,   
+                 181, 161, 162, 55, 250, 235, 123, 110, 17, 11, 158,  
+                 24, 47, 133, 8, 199, 235, 107, 126, 130, 246, 73,    
+                 195, 20, 108, 202, 176, 214, 187, 45, 146, 182, 118, 
+                 54, 32, 200, 61, 201, 71, 243, 1, 255, 131, 84, 37,  
+                 111, 211, 168, 228, 45, 192, 118, 27, 197, 235, 232, 
+                 36, 10, 230, 248, 190, 82, 182, 140, 35, 204, 108,   
+                 190, 253, 186, 186, 27]    ;
+
+          var e = new [1, 0, 1]    
+
+          var d = new [144, 183, 109, 34, 62, 134, 108, 57, 44, 252, 10,     
+                       66, 73, 54, 16, 181, 233, 92, 54, 219, 101, 42, 35,    
+                 178, 63, 51, 43, 92, 119, 136, 251, 41, 53, 23, 191,   
+                 164, 164, 60, 88, 227, 229, 152, 228, 213, 149, 228,   
+                 169, 237, 104, 71, 151, 75, 88, 252, 216, 77, 251,     
+                 231, 28, 97, 88, 193, 215, 202, 248, 216, 121, 195,    
+                 211, 245, 250, 112, 71, 243, 61, 129, 95, 39, 244,     
+                 122, 225, 217, 169, 211, 165, 48, 253, 220, 59, 122,   
+                 219, 42, 86, 223, 32, 236, 39, 48, 103, 78, 122, 216,  
+                 187, 88, 176, 89, 24, 1, 42, 177, 24, 99, 142, 170,    
+                 1, 146, 43, 3, 108, 64, 194, 121, 182, 95, 187, 134,   
+                 71, 88, 96, 134, 74, 131, 167, 69, 106, 143, 121, 27,  
+                 72, 44, 245, 95, 39, 194, 179, 175, 203, 122, 16,      
+                 112, 183, 17, 200, 202, 31, 17, 138, 156, 184, 210,    
+                 157, 184, 154, 131, 128, 110, 12, 85, 195, 122, 241,   
+                 79, 251, 229, 183, 117, 21, 123, 133, 142, 220, 153,   
+                 9, 59, 57, 105, 81, 255, 138, 77, 82, 54, 62, 216,     
+                 38, 249, 208, 17, 197, 49, 45, 19, 232, 157, 251,      
+                 131, 137, 175, 72, 126, 43, 229, 69, 179, 117, 82,     
+                 157, 213, 83, 35, 57, 210, 197, 252, 171, 143, 194,    
+                 11, 47, 163, 6, 253, 75, 252, 96, 11, 187, 84, 130,    
+                 210, 7, 121, 78, 91, 79, 57, 251, 138, 132, 220, 60,   
+                 224, 173, 56, 224, 201]             
+
+
+          var test1 = JOSE.ParseFromCompacted(test1String);
+
+          var alg = test1.keyManageAlgorithm
+
+          var alg2 = test1.encAlgorithm
+
+          keyData["n"] = base64.encodeURL(n);
+          keyData["e"] = base64.encodeURL(e);
+          keyData["d"] = base64.encodeURL(d);
+
+          test1.decrypt(function(keyInfo) {
+              return window.crypto.importKey("jwk", keyData, {name:"RSA-OAEP"}, false, ["decrypt"]);
+          });
+
+      }
+
+      </script>    
+  </head>
+<body>
+  <p>JOSE Test #1 output: <b id="JOSE1">...</b></p>
+  <p>----- Encode: <b id="JOSE1_Encode">....</b></p>
+  <p>JOSE Test #2 output: <b id="JOSE2">...</b></p>
+  <p>JOSE Test #3 output: <b id="JOSE3">...</b></p>
+  <p>JOSE Test #6 output: <b id="JOSE6">...</b></p>
+</body>
+</html>

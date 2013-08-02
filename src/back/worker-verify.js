@@ -146,9 +146,9 @@ Impl.extend({
                         this.die('Signature has too many bytes');
                     }
                     var subSig = hash.subarray(0, this.signature.length);
-                    ver = (subSig == this.signature);
+                    ver = util.memcmp(subSig, this.signature);
                 }
-                else ver = (hash == this.signature);
+                else ver = util.memcmp(hash == this.signature);
                 break;
 
             case 'RSASSA-PKCS1-v1_5':
