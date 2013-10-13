@@ -1,0 +1,1 @@
+0 2 * * * /bin/sh /path-to-script/reset.sh

@@ -16,7 +16,7 @@ Impl.extend({
         var format = args['format'] || null;
         var key = args['key'] || null;
       
-        console.log(JSON.stringify(args))
+        console.log(JSON.stringify(args));
 
         if (!key) {
             this.die('You must provide a key to export');
@@ -64,7 +64,7 @@ Impl.extend({
                 for (var ix in rawKey.key) {
                     jwk[ix] = util.b64encode(util.hex2abv(rawKey.key[ix]));
                 }
-                this.complete(jwk)
+                this.complete(jwk);
                 break;
 
             default:

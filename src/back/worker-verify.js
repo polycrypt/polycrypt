@@ -54,8 +54,7 @@ Impl.extend({
         }
 
         // Check that we have permission to use this key for this purpose
-        if (this.key.hasOwnProperty('keyUsage') &&
-           (this.key.keyUsage.length > 0) &&
+        if ( ! this.key.hasOwnProperty('keyUsage') ||
            (this.key.keyUsage.indexOf("verify") === -1)) {
             // XXX: Should do full algorithm comparison?
             this.die('Verify usage not supported for this key');
@@ -141,7 +140,13 @@ Impl.extend({
                         hash = libpolycrypt.hmac_sha256(this.key.key, data);
                         break;
                 }
-                ver = (hash == this.signature);
+                
+                if (hash.byteLength < this.signature.byteLength) {
+                    this.die('Provided signature is too long');
+                } else if (hash.byteLength > this.signature.byteLength) {
+                	this.signature = hash.subarray(0, this.signature.byteLength);
+                }
+                ver = util.memcmp(hash, this.signature);
                 break;
 
             case 'RSASSA-PKCS1-v1_5':

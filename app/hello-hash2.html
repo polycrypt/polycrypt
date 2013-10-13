@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://polycrypt-test:8001/common/util.js"></script>
+<script src="http://polycrypt-test:8001/front/polycrypt.js"></script>
+<script>
+
+var INPUT, HASH;
+function go() {
+    var hello = util.str2abv(INPUT.value);
+    var op = window.polycrypt.digest("SHA-256", hello);
+    op.oncomplete = function(e) {
+        HASH.value = util.abv2hex(e.target.result);
+    }
+    op.onerror = function(e) {
+        console.log("error");
+    }
+}
+
+function setup() {
+    INPUT = document.getElementById("INPUT");
+    HASH = document.getElementById("HASH");
+    document.getElementById("go").innerHTML = go.toString();
+}
+
+/**
+ * The util. version uses a Uint8Array constructor, which does not work with
+ * the proxy ArrayBufferView object that Firefox passes to the content page.
+ */
+function abv2hex (abv) {
+    var hex = "";
+    for (var i = 0; i < abv.length; ++i) {
+        var zeropad = (abv[i] < 0x10) ? "0" : "";
+        hex += zeropad + abv[i].toString(16);
+    }
+    return hex;
+}
+
+if (window.polycrypt.polyfill) {
+    window.polycrypt.onalive = setup;
+} else {
+    util.abv2hex = abv2hex;
+    window.onload = setup;
+}
+
+</script>
+<style>
+pre {
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 1ex;
+}
+</style>
+</head>
+
+<body style="font-family: Monospace;">
+
+<table>
+    <tr>
+        <td>INPUT:</td>
+        <td><input id="INPUT" type="text" size="100" onkeyup="go();"></td>
+    </tr>
+    <tr>
+        <td>HASH:</td>
+        <td><input id="HASH" type="text" size="100" disabled></td>
+    </tr>
+</table>
+
+<hr/><code><pre id="go"></pre></code>
+
+
+</body>
+</html>
+

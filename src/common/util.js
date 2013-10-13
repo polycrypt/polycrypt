@@ -43,8 +43,8 @@ var util = {
 
         if (x.byteLength !== y.byteLength) { return false; }
 
-        var xb = new Uint8Array(x.buffer);
-        var yb = new Uint8Array(y.buffer);
+        var xb = new Uint8Array(x.buffer, x.byteOffset, x.byteLength);
+        var yb = new Uint8Array(y.buffer, y.byteOffset, y.byteLength);
         for (var i=0; i<xb.byteLength; ++i) {
             if (xb[i] !== yb[i]) {
                 return false;

@@ -1,19 +1,4 @@
-.pydevproject
-TestVectors.js
-TestVectors.h
-TestVectors.py
 *.log
 *.swp
 *.pyc
-
-test/c/*.db
-test/c/nss
-test/c/obj
-test/c/encrypt
-test/c/hash
-test/c/hash_etc
-test/c/key_gen_and_wrap
-test/c/test
-test/js/lib/
-test/js/src/
 

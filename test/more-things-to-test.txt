@@ -1,4 +1,0 @@
-Sending data in multiple calls to processData().
-Trying an unsupported algorithm.
-Giving incomplete or incorrect algorithm parameters.
-Verifying a bad signature.

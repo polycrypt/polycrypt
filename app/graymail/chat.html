@@ -1,0 +1,267 @@
+<html>
+    <title>
+        GrayMail
+    </title>
+
+	<head>
+        <script src= "//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+        <script src = "js/adapter.js"></script>
+        <script src = "js/nf/nfutil.js"></script>
+        <script src = "js/nf/nfcrypto.js"></script>
+        <script src = "js/polycrypt/polycrypt.js"></script>
+        <script src = "js/polycrypt/common/util.js"></script>
+        <script src = "js/rtc2.js"></script>
+    </head>
+
+    <script>
+        /* Used for short-polling of the server */
+        var timer;
+
+        /* The id number of the room the user is waiting in */
+        var roomId = {{ roomId }};
+
+        /* the user id value for this user */
+        var userId = {{ userId }};
+
+        /* The number of people currently in the room */
+        var count = {{ count }};
+
+        /* True if user has clicked "Submit" to enter username/password information */
+        var accepted = false;
+
+        /* The display name for this user (either the userId or value entered by user */
+        var name = userId;
+
+        window.onload = function() {
+        	/* Get a user's nickname or none (use id number) */
+            getInfo = function() {
+                var user = $("#usernameInput").val();
+                var pw = $("#passwordInput").val();
+                
+                if (user) {
+                    name = user;
+                }
+
+                if (pw) {
+                    password = pw;
+                }
+
+                $("#requestInfo").hide();
+                $("#chat").fadeIn();
+
+                accepted = true;
+
+                if (accepted && webrtc) {
+                    startRSA();
+                }
+            }
+
+            startPolling();
+        }
+        
+        /* Perform short-polling of the server for webrtc signaling information from the other peer */
+        var startPolling = function() {
+            console.log("startPolling()");
+            
+            /* Ask the server for updates once a second */
+            timer = setInterval(function() {
+                var query = new XMLHttpRequest();
+                query.open("POST", "./py/message.py", true);
+                query.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                query.send("roomId=" + roomId + "&userId=" + userId);
+                var response;
+
+                /*
+                 *  Using persistent polling means many messages may be waiting
+                 *  for the client at a given time.  Since these messages are
+                 *  JSON objects, we must break them apart into individual objects
+                 *  (nested OK)
+                 */
+                query.onload = function() {
+                    response = query.response;
+                    
+                    /* get rid of <html><body> */
+                    response = response.substring(12);
+                    
+                    response = response.substring(0, response.indexOf("</body></html>"));
+                    response = decodeURIComponent(response);
+                    if (response) {                        
+                        var responses = new Array();
+                        var curr = "";
+
+                        /* Find stand-alone JSON objects by counting
+                         * { and } pairs using a stack.  If the number of
+                         * { and } are equal at any given time (IE count == 0),
+                         * then we know we have a complete JSON object and we 
+                         * will pull this out as a single webrtc signaling
+                         * message
+                         */
+                        var count = 0;
+                        for (var i = 0; i < response.length; i++) {
+                            if (response.charAt(i) == '{') {
+                                count = count + 1;
+                            } else if (response.charAt(i) == '}') {
+                                count = count - 1;
+                            }
+
+                            curr = curr + response.charAt(i);
+
+                            if (count == 0) {
+                                responses.push(curr);
+                                curr = "";
+                            }
+                        }
+
+                        /* For every message received, alert the signaling channel */
+                        for (var i = 0; i < responses.length; i++) {
+                            signalingChannel.onMessage(responses[i]);
+                        }
+                    } else {
+                        //...else we wait!
+                    }
+                }
+            }, 1000);   
+
+            /* if we're the first user in the room, start webrtc with start(true) */
+            if (count == 1) {
+                start(true)
+            };
+        }
+        
+        /* Delete the rows in the MySql server associated with this chat room */
+        var logout = function() {
+            var r = new XMLHttpRequest();
+            r.open("POST", "./py/logout.py", true);
+            r.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            r.send("roomId=" + roomId + "&userId=" + userId);
+
+            console.log("\nLogging out of server\n");
+        };
+               
+        /* Browsers handle leaving the page differently, so we need a few handlers */
+        $(window).on('unload', function() {
+            logout();
+        }); 
+
+        $(window).on('beforeunload', function() {
+            logout();
+        });
+
+        /*
+         *  Only encrypt/send messages that are non-empty
+         */
+        function performEncryption() {
+       	    if ($("#sendBox").val() == '') {
+       	    	//trying to send an empty message
+           	    return; 
+       	    } else {
+           	    /* Also sends the message, found in rtc2.js */
+           	    encrypt(document.getElementById('sendBox').value);
+           	}
+        }
+
+        /*
+         *  Enable sending of chat messages
+         *  Inform the user that the chat is ready
+         */
+        function enableChat() {
+            $("#sendBox").removeAttr("disabled");
+            $("#send").removeAttr("disabled");
+
+            $("#status").text("Welcome to Chat #" + roomId);
+        
+            logout();
+        }
+
+        /*
+         *  Alert the user of updateis by changing the title of the chat on the screen
+         */
+        function updateChat(val) {
+           $("#status").text(val);
+        }
+
+        /*
+         *  Alert the user if a crypto operation explicitly fails
+         */
+         function cryptoError() {
+            updateChat("Error Establishing Secure Connection.  Please try again");
+        }
+
+    </script>
+    <style>
+        body {
+            background: black;
+            font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+            color: black;
+        }
+        table, th, td {
+            border: 4px solid #F8F8F8;
+            border-collapse:collapse;
+            background-color: #F8F8F8;
+        }
+        .lightgray {
+            background-color: #F8F8F8;
+            color: black;
+            background-color: #F8F8F8;
+        }
+        table.invisible {
+            display: none;
+        }
+        button {
+		    background-color:#b0b;
+		    border:1px solid black;
+		    border-radius:6px;
+		    display:inline-block;
+		    color:#ffffff;
+		    font-family:arial;
+		    font-size:15px;
+		    font-weight:bold;
+		    width: 5em;
+		    opacity: 0.5;
+		}
+		label.white, button.white {
+		    color: white;
+		    opacity: 1.0;
+		}
+		
+    </style>
+	<body>
+	    <center>
+		    <font color = "white" size = 16>Gray</font>
+		    <b><font color = "#b0b" size = 16>Mail</font></b>
+		    
+		    <div id = "requestInfo">
+		        <center>
+		            <label id = "usernameLbl" class = "white">Enter Username</label><br>
+		            <input type = "input" id = "usernameInput"></input><br><br>
+		            <label id = "passwordLbl" class = "white">Enter Password</label><br>
+                    <input type = "input" id = "passwordInput"></input><br>
+                    <button type = "button" class = "white" id = "submit" onclick = "getInfo();">Submit</button>
+		        </center>
+		    </div>
+	        <table class = "invisible" id = "chat">
+	            <tr>
+	                <td><center><label id = "status" style="font-size:18;">Waiting for other user...</label></center></td>
+	            </tr>
+	
+	            <tr>
+	                <td>
+	                    <center>
+	                    <div id = "messages" class = "lightgray" style="background-color:#FFFFFF;height:450px;width:600px;text-align:left;border:1px solid #ccc;font:16px/16px 'Times New Roman' Times Serif; overflow:auto;">
+	                    </center>
+	                    </div>
+	                </td>
+		        </tr>
+	
+	            <tr>
+	                <td colspan = "2" align = "center">
+	                    <div>
+	                        <input type = "input"  disabled = true id = "sendBox" style = "width:300px" onKeyDown = "if (event.keyCode == 13) performEncryption();"></label>
+	                        <button type = "button" class = "white" id = "send" disabled = true onclick = "performEncryption();">Send</button>
+	                    </div>
+	                </td>
+	            </tr>
+	        </table>
+	    </center>
+    </body>
+</html>

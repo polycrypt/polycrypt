@@ -52,8 +52,7 @@ Impl.extend({
         }
 
         // Check that we have permission to use this key for this purpose
-        if (this.key.hasOwnProperty('keyUsage') &&
-           (this.key.keyUsage.length > 0) &&
+        if ( ! this.key.hasOwnProperty('keyUsage') ||
            (this.key.keyUsage.indexOf("sign") === -1)) {
             // XXX: Should do full algorithm comparison?
             this.die('Signing usage not supported for this key');

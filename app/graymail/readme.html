@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="/Users/aweber/.pandoc/style.css" type="text/css" />
+</head>
+<body>
+<div id="TOC">
+<ul>
+<li><a href="#graymail-encrypted-chat">GrayMail Encrypted Chat</a><ul>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#bugs">Bugs</a></li>
+<li><a href="#protocol">Protocol</a></li>
+<li><a href="#cryptography-notes">Cryptography notes</a></li>
+<li><a href="#known-issue"><em>*</em> Known Issue <em>*</em></a></li>
+<li><a href="#implementation-details">Implementation Details</a></li>
+<li><a href="#source-files">Source Files</a></li>
+<li><a href="#installation-instructions">Installation Instructions</a></li>
+</ul></li>
+</ul>
+</div>
+<h1 id="graymail-encrypted-chat"><a href="#graymail-encrypted-chat">GrayMail Encrypted Chat</a></h1>
+<p>GrayMail allows two peers to send encrypted messages using WebRTC Data Connections. It provides end-to-end encryption using AES-GCM-128. One user will access the chat client. They will be redirected to a chat room with a specific id number. They should copy this link and send it to the person that they want to chat with using some other chat mechanism such as gchat or facebook chat. Each user can enter a username (their messages will be displayed as coming from this name) and a password. This password serves to authenticate the users to each other. If two people who want to communicate enter the same chat room but use different passwords, they will be unable to communicate. These passwords are NOT required.</p>
+<h4 id="requirements"><a href="#requirements">Requirements</a></h4>
+<p>As of 8/14/2013, Google Chrome and Mozilla Firefox are supported.</p>
+<p>As of 9/18/2013, Mac OS X 10.7.5 and Ubuntu 12.04-64 bit are supported and tested, but other versions should work.</p>
+<p>Each user of Graymail must use the same browser.</p>
+<ul>
+<li>Firefox &lt;--&gt; Firefox (works)</li>
+<li>Chrome &lt;--&gt; Chrome (works)</li>
+<li>Chrome &lt;--&gt; Firefox (does NOT work)</li>
+</ul>
+<p>As of 8/14/2013, Firefox and Chrome implement different versions of the signaling protocol required for WebRTC DataConnections, which is why the same browser must be used at each client end. Different versions of each browser should work, assuming that WebRTC is enabled and supported in the specific version.</p>
+<p>GrayMail uses Polycrypt which implements a recent draft of the Web Crypto API specification (early Summer, 2013). More recently, Netflix developed nfCrypto which implements the same spec. Graymail automatically detects if nfCrypto is installed and will seamlessly switch to using this API for some of the cryptographic operations required for the client. If nfCrypto is not detected, the application will use Polycrypt for all operations. Please read up on <a href="https://www.polycrypt.net">Polycrypt</a> for more information and remember that there are serious issue with using pure JavaScript libraries to perform crypto on the web.</p>
+<p>To use Graymail with nfCrypto:</p>
+<ul>
+<li>Use 64-bit Ubuntu 12.04</li>
+<li>Install <a href="https://github.com/Netflix/NfWebCrypto">NfWebCrypto</a></li>
+<li>Use Google Chrome to access Graymail (launched from NfWebCrypto, using the proper launch script)</li>
+</ul>
+<h4 id="bugs"><a href="#bugs">Bugs</a></h4>
+<p>As of 9/25/13, there is a small chance that two clients cannot connect via WebRTC. This is most likely due to the fact that when messages are queued in the DB, the CGI script will send these messages to the client and then remove those messages from the DB. However, after the queued messages are read but before sent out, the client may have sent another message to the server and inserted into the DB. Precisely then, the DB sends out the messages (does not include the new one) and deletes the saved messages (includes the new one), so the new message is never received by the other peer.</p>
+<h4 id="protocol"><a href="#protocol">Protocol</a></h4>
+<p>Optional pre-shared secret. If none specified, use default value.</p>
+<pre><code>Client 1 --&gt; ephemeral RSA public key 1 --&gt; Client 2
+Client 1 &lt;-- ephemeral RSA public key 2 &lt;-- Client 2</code></pre>
+<p>Clients generate random 32-bit nonces.</p>
+<pre><code>Client 1 --&gt; PUB_ENC_CLIENT2RSA(nonce1) --&gt; Client 2
+Client 1 &lt;-- PUB_ENC_CLIENT1RSA(nonce2) &lt;-- Client 2</code></pre>
+<p>Clients decrypt the received nonces.<br />Clients generate a shared symmetric AES-GCM key:</p>
+<pre><code>Key K = PBKDF2(secret, SHA1(nonce1) ^ SHA1(nonce2), 2048)</code></pre>
+<h4 id="cryptography-notes"><a href="#cryptography-notes">Cryptography notes</a></h4>
+<p>Ephemeral keys provide forward secrecy.</p>
+<p>Pre-shared secret used for authentication.</p>
+<h4 id="known-issue"><a href="#known-issue"><em>*</em> Known Issue <em>*</em></a></h4>
+<p>A malicious client can wait to receive a hashed nonce from the other peer, and send back that exact hashed nonce so</p>
+<pre><code>SHA1(nonce1) ^ SHA1(nonce2) = 0x0...0</code></pre>
+<p>This is taken care of by making sure that</p>
+<pre><code>SHA1(nonce1) != SHA1(nonce2)</code></pre>
+<p>If this happens, the client will &quot;self destruct&quot; and delete almost all objects required for communication and immediately alerts the user. The odds of this accidentally happening are negligibly small.</p>
+<h4 id="implementation-details"><a href="#implementation-details">Implementation Details</a></h4>
+<p>Encrypted Message Transmission Format =</p>
+<pre><code>B64(IV) : B64(AES-GCM cipher output) : B64(additionalData)</code></pre>
+<h4 id="source-files"><a href="#source-files">Source Files</a></h4>
+<ul>
+<li><code>chat.html</code> --&gt; HTML / CSS / JavaScript to handle the user-client interactions</li>
+<li><code>chat.py</code> --&gt; Python CGI to let users create and join rooms</li>
+<li><p><code>dbparams.py</code> --&gt; KEEP THIS SECRET! Contains your MySQL login information</p></li>
+<li><code>js/adapter.js</code> --&gt; Google code to handle WebRTC variable renaming conventions between Firefox and Chrome</li>
+<li><code>js/rtc2.js</code> --&gt; sets up the WebRTC connection and handles cryptographic operations</li>
+<li><code>js/nf/nfcrypto.js</code> --&gt; loads the Netflix Crypto wrappers</li>
+<li><code>js/nf/nfutil.js</code> --&gt; loads the Netflix Crypto utility library</li>
+<li><p><code>js/polycrypt/*</code> --&gt; all necessary APIs for Polycrypt to function</p></li>
+<li><code>py/dbparams.py</code> --&gt; KEEP THIS SECRET! Contains your MySQL login information</li>
+<li><code>py/index.html</code> --&gt; Default page to stop users from exploring your directory</li>
+<li><code>py/logout.py</code> --&gt; Logs a user out of the chat service (removes their rows from the DB)</li>
+<li><code>py/message.py</code> --&gt; Used to send messages from the server to the client (webrtc information)</li>
+<li><p><code>py/update.py</code> --&gt; Used to send messages from the client to the server (webrtc information)</p></li>
+<li><code>util/reset.py</code> --&gt; KEEP THIS SECRET! Empty all tables in the DB</li>
+<li><code>util/reset.sh</code> --&gt; KEEP THIS SECRET! Shell script used by the cron job to reset the tables</li>
+<li><code>util/resetcron.txt</code> --&gt; KEEP THIS SECRET! The cron job to register with crontab</li>
+<li><p><code>util/setup.py</code> --&gt; KEEP THIS SECRET! Setup the tables for the server</p></li>
+</ul>
+<h4 id="installation-instructions"><a href="#installation-instructions">Installation Instructions</a></h4>
+<ol style="list-style-type: decimal">
+<li>Have a web server and MySQL server up and running</li>
+<li>Create a database called &quot;goliath&quot; (or something else) on your MySQL server</li>
+<li>Put all of the source files on your webserver (<code>license.txt</code>, <code>chat.html</code>, <code>chat.py</code>, <code>js/*</code>, <code>py/*</code>, <code>util/*</code>)</li>
+<li>Make sure all file permissions are setup correctly (Especially the &quot;KEEP THIS SECRET!&quot; files)</li>
+<li>Modify <code>dbparams.py</code> to include your MySQL server address, username, password and DB name. There are two of these files.<br /></li>
+<li>Run <code>../util/setup.py</code> to create the appropriate database tables</li>
+<li>Register the cron job <code>../util/resetcron.txt</code> --&gt; Cleans up the database</li>
+<li>Direct users to <code>http://www.your-web-server.com/chat.py</code></li>
+</ol>
+</body>
+</html>

@@ -60,12 +60,12 @@ var AESGCM = {
             encrypt: function aes_encrypt(x) {
                 var xw = util.abv2wa(x);
                 this._impl.encryptBlock(xw.words, 0);
-                return util.wa2abv(xw)
+                return util.wa2abv(xw);
             },
             decrypt: function aes_decrypt(x) {
                 var xw = util.abv2wa(x);
                 this._impl.decryptBlock(xw.words, 0);
-                return util.wa2abv(xw)
+                return util.wa2abv(xw);
             },
         };
     },

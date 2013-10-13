@@ -53,7 +53,7 @@ Impl.extend({
                     algorithm: algoName,
                     keyUsage: keyUsages,
                     key: bareKey,
-                }
+                };
                 key = libpolycrypt.wrap_key(this.apiKey, key);
                 this.complete(key);
                 break;
@@ -94,7 +94,7 @@ Impl.extend({
                     algorithm: algoName,
                     keyUsage: keyUsages,
                     key: bareKey
-                }
+                };
                 keyPair.publicKey = libpolycrypt.wrap_key(this.apiKey, keyPair.publicKey);
                 keyPair.privateKey = libpolycrypt.wrap_key(this.apiKey, keyPair.privateKey);
                 this.complete(keyPair);
@@ -114,7 +114,7 @@ Impl.extend({
                     algorithm: algoName,
                     keyUsage: keyUsages,
                     key: bareKey,
-                }
+                };
                 key = libpolycrypt.wrap_key(this.apiKey, key);
                 this.complete(key);
                 break;

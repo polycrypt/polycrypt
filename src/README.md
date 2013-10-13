@@ -1,14 +1,15 @@
 # A rough guide to PolyCrypt
 
+**NOTE:  this file is old.  We plan to update it, soon.**
+
 PolyCrypt divides its functionality between two origins in order to emulate the separation between content and browser provided by the real WebCrypto API.  This document walks through how the various pieces fit together.  
 
 The WebCrypto API is an evolving document right now.  We have tried to implement [the latest draft][WebCrypto-latest] 
 
 [Last updated: Commit 08019b1, 29 Dec 2012]
 
-The overall goal of PolyCrypt is to support the WebCrypto API's style of 'operations'.  Each operation provides a set of methods that initiate crypto processing, and a set of events that fire when results are ready.
+The overall goal of PolyCrypt is to support the WebCrypto API's style of 'operations'.  Each operation provides a set of methods that initiate crypto processing, and a set of events that fire when results are ready.  For example:
 
-    // src/app/api-test/api-test.js:39
     var op = window.crypto.generateKey("AES-GCM");
     op.oncomplete = function(e) {
        self.test( 0.1, 
@@ -27,7 +28,7 @@ Let's walk through the processes by which this overall goal is accomplished.  Th
 
 ## Page Load
 
-To use polycrypt, the application page loads `src/polycrypt.js`.  This file adds an event listener (`polycrypt\_load()`), that does three:
+To use polycrypt, the application page loads `src/polycrypt.js`.  This file adds an event listener, `polycrypt_load()`, that does the following:
 
 * Loads the PolyCrypt back end in an iframe
 * Imports some auxiliary scripts
@@ -41,9 +42,9 @@ Polycrypt's functionality is exposed through a set of methods on `window.crypto`
 
 DelegatedEventTarget objects are generic, however, so our methods will need to specialize them into KeyOperations or CryptoOperations (as defined in the API spec) by adding appropriate methods and event handlers.  Since methods are all implemented in the back end, the body of each method on an operation object will be a call to the object's internal `\_postMessage` method, which passes the method name and arguments to the back end.  (This is effectively a postMessage-based RPC.)
 
-Later on, events will come back to this operation from the back end, to be dispatched to listeners.  DelegatedEventTarget objects implement the standard [EventTarget interface][eventtarget].  They will allow listeners to register for any type of event, and pass on any event received from the back end to listeners for its type.  To support HTML4-style event listener assignment, the WebCrypto API also defines listener attributes on operation objects, such as "oncomplete" or "onerror".  DelegatedEventTarget has a convenience function `\_addCallback` that creates a JavaScript "setter" on the operation object for the given type of event.  For example, after `op.\_addCallback("complete")` has been called, the application can set a listener for "complete" events using the syntax `op.oncomplete = function(e) { ... }`.
+Later on, events will come back to this operation from the back end, to be dispatched to listeners.  DelegatedEventTarget objects implement the standard [EventTarget interface][eventtarget].  They will allow listeners to register for any type of event, and pass on any event received from the back end to listeners for its type.  To support HTML4-style event listener assignment, the WebCrypto API also defines listener attributes on operation objects, such as "oncomplete" or "onerror".  DelegatedEventTarget has a convenience function `_addCallback` that creates a JavaScript "setter" on the operation object for the given type of event.  For example, after `op._addCallback("complete")` has been called, the application can set a listener for "complete" events using the syntax `op.oncomplete = function(e) { ... }`.
 
-Our `window.crypto` methods also perform an important bookkeeping function, assigning each operation a unique "operation id" (referred to as `opid` below and in the code).  In addition to just creating the object, they may also go ahead an initiate processing.  
+Our `window.crypto` methods also perform an important bookkeeping function, assigning each operation a unique "operation id" (referred to as `opid` below and in the code).  In addition to creating the object, they may also initiate processing.  
 
 The following example illustrates most of the above steps.  The only one it misses is to add a method for the app to call.  If it had defined a method, the body of the method would be similar to the `_postMessage` call at the end, copying parameters into a dictionary, specifying a method call, and sending a `_postMessage` call.
 
@@ -114,7 +115,7 @@ Summary of control flow:
 
 As noted above, DelegatedEventTargets implement methods by passing messages to WorkerDelegates, which then get passed on to Workers for the real work.  So the method invocation process is basically just this sequence of messages.  The message contains a `method` field that specifies the method to be invoked and an `args` field with a dictionary of arguments to the method.
 
-The one nuance is that a WorkerDelegate can add "private fields" to a message, which will only be visibile to it and the worker -- not to the front end.  These fields are added to the message as it is passed to the worker, and stripped from any messages the worker sends back.  The primary example of this is the "API key" used by the back end for key wrapping.  (The WorkerDelegate itself doesn't do any key wrapping or unwrapping, but it passes the key for key wrapping back to Workers.)
+The one nuance is that a WorkerDelegate can add "private fields" to a message, which will only be visible to it and the worker -- not to the front end.  These fields are added to the message as it is passed to the worker, and stripped from any messages the worker sends back.  The primary example of this is the "API key" used by the back end for key wrapping.  (The WorkerDelegate itself doesn't do any key wrapping or unwrapping, but it passes the key for key wrapping back to Workers.)
 
 Summary of control flow:
 

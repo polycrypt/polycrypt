@@ -33,8 +33,6 @@ Quick Start
 
 ## Known issues
 
-* Uses `window.polycrypt` instead of `window.crypto.subtle`, because some browsers don't allow extensions to `window.crypto.subtle`.
-* The following algorithms in the WebCrypto specification are not currently supported: RSA-OAEP, RSA-PSS, ECDSA, ECDH, Diffie-Hellman, Concat KDF
 * Safari: Does not work in Private Browsing Mode
 * Firefox: Does not work if cookies set to "Ask me"
 * Appears not work with NoScript (even when disabled for site)

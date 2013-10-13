@@ -63,7 +63,6 @@ WorkerDelegate.prototype = {
     },
 
     handleSourceMessage: function WorkerDelegate_handle(e) {
-        log4js.trace("Entered WorkerDelegate_handleSourceMessage", e.data);
         // Validate message
         var msg = e.data;
         if (!PCMessage.valid(msg)) { return; }
@@ -75,6 +74,10 @@ WorkerDelegate.prototype = {
             // TODO: Handle locally (e.g., unregister and die)
             return;
         }
+
+        // Leave this till after you check that the message is valid and that
+        // it belongs to this instance; else, all instances print to log.
+        log4js.trace("Entered WorkerDelegate_handleSourceMessage", e.data);
 
         // Add any private fields to the message
         // (Just between the back end and the worker)
@@ -90,7 +93,9 @@ WorkerDelegate.prototype = {
     },
 
     handleWorkerMessage: function WorkerDelegate_handleWorkerMessage(e) {
-        log4js.trace("Entered WorkerDelegate_handleWorkerMessage", e.data);
+        // Leave this trace off, cause it duplicates another log call.
+        //log4js.trace("Entered WorkerDelegate_handleWorkerMessage", e.data);
+
         // Validate message
         var msg = e.data;
         if (!msg.method && !msg.event) {

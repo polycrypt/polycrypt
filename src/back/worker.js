@@ -87,7 +87,7 @@ var Impl = {
             event: { type: type },
             result: result
         });
-        self.postMessage(msg)
+        self.postMessage(msg);
     },
 
     postMessage: function worker_postMessage(method, args) {
