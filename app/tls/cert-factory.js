@@ -23,10 +23,9 @@ var CertFactory = (function() {
         // Callback to step 2
         var op = window.polycrypt.generateKey({
             name: "RSASSA-PKCS1-v1_5",
-            params: { 
-                modulusLength: 1024,
-                publicExponent: new Uint8Array([0x01, 0x00, 0x01])
-            }
+
+            modulusLength: 1024,
+            publicExponent: new Uint8Array([0x01, 0x00, 0x01])
         });
         op.onerror = handleError;
         op.oncomplete = step2;
@@ -76,7 +75,7 @@ var CertFactory = (function() {
         // Callback to step 4
         var op = window.polycrypt.sign({
                 name: "RSASSA-PKCS1-v1_5",
-                params: { hash: "SHA-1" }
+                hash: "SHA-1"
             }, privKey, tbsc);
         op.onerror = handleError;
         op.oncomplete = step4;

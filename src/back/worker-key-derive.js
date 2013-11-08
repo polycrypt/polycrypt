@@ -57,11 +57,11 @@ Impl.extend({
             case "AES-CTR":
             case "AES-GCM":
             case "HMAC":
-                if (!derivedKeyType.params || !derivedKeyType.params.length) {
+                if (!derivedKeyType.length) {
                     this.die('Derived algorithm name must provide key length');
                     return;
                 }
-                keyLength = derivedKeyType.params.length;
+                keyLength = derivedKeyType.length;
                 break;
 
             default:
@@ -75,27 +75,26 @@ Impl.extend({
         switch (algoName) {
             case "PBKDF2":
                 // Check required fields
-                if (!algorithm.params || 
-                    !algorithm.params.hasOwnProperty('salt') ||
-                    !algorithm.params.hasOwnProperty('iterations') ||
-                    !algorithm.params.hasOwnProperty('prf')) {
+                if (!algorithm.hasOwnProperty('salt') ||
+                    !algorithm.hasOwnProperty('iterations') ||
+                    !algorithm.hasOwnProperty('prf')) {
                     this.die("PBKDF2 parameters must be provided");
                     return;
                 }
-                var prf = this.algoName(algorithm.params.prf);
+                var prf = this.algoName(algorithm.prf);
                 // Do the computation
                 if (prf === "SHA-1") {
                     keyData = libpolycrypt.pbkdf2_sha1(
                         rawKey.key,
-                        algorithm.params.salt,
-                        algorithm.params.iterations,
+                        algorithm.salt,
+                        algorithm.iterations,
                         keyLength >> 3
                     );
                 } else if (prf === "SHA-256") {
                     keyData = libpolycrypt.pbkdf2_sha256(
                         rawKey.key,
-                        algorithm.params.salt,
-                        algorithm.params.iterations,
+                        algorithm.salt,
+                        algorithm.iterations,
                         keyLength >> 3
                     );
                 } else {

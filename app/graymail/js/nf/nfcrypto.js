@@ -460,15 +460,15 @@ End of (PolyCrypt) License Terms and Conditions.
     };
 
     that.encrypt = function (algorithm, key, buffer) {
-        if (algorithm.hasOwnProperty('params') && algorithm.params.hasOwnProperty("iv")) {
-            algorithm.params.iv = b64encode(algorithm.params.iv);
+        if (algorithm.hasOwnProperty("iv")) {
+            algorithm.iv = b64encode(algorithm.iv);
         }
         return createCryptoOp('encrypt', algorithm, key, null, buffer);
     };
 
     that.decrypt = function (algorithm, key, buffer) {
-        if (algorithm.hasOwnProperty('params') && algorithm.params.hasOwnProperty("iv")) {
-            algorithm.params.iv = b64encode(algorithm.params.iv);
+        if (algorithm.hasOwnProperty("iv")) {
+            algorithm.iv = b64encode(algorithm.iv);
         }
         return createCryptoOp('decrypt', algorithm, key, null, buffer);
     };
@@ -484,20 +484,18 @@ End of (PolyCrypt) License Terms and Conditions.
     that.generateKey = function (algorithm, extractable, keyUsage) {
         var tob64 = ["publicExponent", "prime", "generator"];
         var propName;
-        if (algorithm.hasOwnProperty('params')) {
-            for (var i = 0; i < tob64.length; i++) {
-                propName = tob64[i];
-                if (algorithm.params.hasOwnProperty(propName)) {
-                    algorithm.params[propName] = b64encode(algorithm.params[propName]);
-                }
+        for (var i = 0; i < tob64.length; i++) {
+            propName = tob64[i];
+            if (algorithm.hasOwnProperty(propName)) {
+                algorithm[propName] = b64encode(algorithm[propName]);
             }
         }
         return createKeyOp('generate', null, null, algorithm, extractable, keyUsage);
     };
 
     that.deriveKey = function (algorithm, baseKey, derivedKeyAlgorithm, extractable, keyUsage) {
-        if (algorithm.hasOwnProperty('params') && algorithm.params.hasOwnProperty("public")) {
-            algorithm.params["public"] = b64encode(algorithm.params["public"]);
+        if (algorithm.hasOwnProperty("public")) {
+            algorithm["public"] = b64encode(algorithm["public"]);
         }
         return createKeyOp("derive", null, null, algorithm, extractable, keyUsage, baseKey, derivedKeyAlgorithm, null)
     };
