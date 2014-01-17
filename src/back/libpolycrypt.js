@@ -176,6 +176,22 @@ var libpolycrypt = {
         return util.wa2abv(hash);
     },
 
+    sha384: function libpolycrypt_sha384(data) {
+        // CryptoJS implementation
+        var sha384 = CryptoJS.algo.SHA384.create();
+        sha384.update(util.abv2wa(data));
+        var hash = sha384.finalize();
+        return util.wa2abv(hash);
+    },
+
+    sha512: function libpolycrypt_sha512(data) {
+        // CryptoJS implementation
+        var sha512 = CryptoJS.algo.SHA512.create();
+        sha512.update(util.abv2wa(data));
+        var hash = sha512.finalize();
+        return util.wa2abv(hash);
+    },
+
     hmac_sha1: function libpolycrypt_hmac_sha1(key, data) {
         // CryptJS implementation
         var hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA1, util.abv2wa(key));
@@ -187,6 +203,22 @@ var libpolycrypt = {
     hmac_sha256: function libpolycrypt_hmac_sha256(key, data) {
         // CryptJS implementation
         var hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, util.abv2wa(key));
+        hmac.update(util.abv2wa(data));
+        var hash = hmac.finalize();
+        return util.wa2abv(hash);
+    },
+
+    hmac_sha384: function libpolycrypt_hmac_sha384(key, data) {
+        // CryptJS implementation
+        var hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA384, util.abv2wa(key));
+        hmac.update(util.abv2wa(data));
+        var hash = hmac.finalize();
+        return util.wa2abv(hash);
+    },
+
+    hmac_sha512: function libpolycrypt_hmac_sha512(key, data) {
+        // CryptJS implementation
+        var hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA512, util.abv2wa(key));
         hmac.update(util.abv2wa(data));
         var hash = hmac.finalize();
         return util.wa2abv(hash);
@@ -330,6 +362,32 @@ var libpolycrypt = {
         return util.hex2abv(sig_s);
     },
 
+    sign_pkcs1_sha384: function libpolycrypt_sign_pkcs1_sha384(n, e, d, content) {
+        // Convert everything to hex strings
+        var n_s = util.abv2hex(n);
+        var e_s = util.abv2hex(e);
+        var d_s = util.abv2hex(d);
+        var content_w = util.abv2wa(content);
+        
+        var k = new RSAKey();
+        k.setPrivate(n_s, e_s, d_s);
+        var sig_s = k.sign(content_w, 'sha384');
+        return util.hex2abv(sig_s);
+    },
+
+    sign_pkcs1_sha512: function libpolycrypt_sign_pkcs1_sha512(n, e, d, content) {
+        // Convert everything to hex strings
+        var n_s = util.abv2hex(n);
+        var e_s = util.abv2hex(e);
+        var d_s = util.abv2hex(d);
+        var content_w = util.abv2wa(content);
+        
+        var k = new RSAKey();
+        k.setPrivate(n_s, e_s, d_s);
+        var sig_s = k.sign(content_w, 'sha512');
+        return util.hex2abv(sig_s);
+    },
+
     verify_pkcs1: function libpolycrypt_sign_pkcs1_sha1(n, e, content, sig) {
         // Convert everything to hex strings
         var n_s = util.abv2hex(n);
@@ -366,6 +424,34 @@ var libpolycrypt = {
                 keySize: bytes/4,
                 iterations: iter,
                 hasher: CryptoJS.algo.SHA256,
+            });
+        return util.wa2abv(key);
+    },
+
+    pbkdf2_sha384: function libpolycrypt_pbkdf2_sha384(password, salt, iter, bytes) {
+        // Convert everything to word arrays
+        var password_wa = util.abv2wa(password);
+        var salt_wa = util.abv2wa(salt);
+
+        var key = CryptoJS.PBKDF2(password_wa, salt_wa,
+            {
+                keySize: bytes/4,
+                iterations: iter,
+                hasher: CryptoJS.algo.SHA384,
+            });
+        return util.wa2abv(key);
+    },
+
+    pbkdf2_sha512: function libpolycrypt_pbkdf2_sha512(password, salt, iter, bytes) {
+        // Convert everything to word arrays
+        var password_wa = util.abv2wa(password);
+        var salt_wa = util.abv2wa(salt);
+
+        var key = CryptoJS.PBKDF2(password_wa, salt_wa,
+            {
+                keySize: bytes/4,
+                iterations: iter,
+                hasher: CryptoJS.algo.SHA512,
             });
         return util.wa2abv(key);
     },

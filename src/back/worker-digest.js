@@ -4,6 +4,8 @@
 importScripts('./lib/CryptoJS/core-min.js');
 importScripts('./lib/CryptoJS/sha1-min.js');
 importScripts('./lib/CryptoJS/sha256-min.js');
+importScripts('./lib/CryptoJS/sha384-min.js');
+importScripts('./lib/CryptoJS/sha512-min.js');
 // Crypto glue
 importScripts('./libpolycrypt.js');
 
@@ -70,6 +72,10 @@ Impl.extend({
                 break;
             case 'SHA-256':
                 digest = libpolycrypt.sha256(data);
+            case 'SHA-384':
+                digest = libpolycrypt.sha384(data);
+            case 'SHA-512':
+                digest = libpolycrypt.sha512(data);
         }
 
         this.complete(digest);
