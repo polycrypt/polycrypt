@@ -1,11 +1,15 @@
 /*global self, Uint32Array */
 
 // CryptoJS requirements
-importScripts('./lib/CryptoJS/core-min.js');
+//importScripts('./lib/CryptoJS/core-min.js');
+importScripts('./lib/CryptoJS/core.js');
 importScripts('./lib/CryptoJS/cipher-core-min.js');
 importScripts('./lib/CryptoJS/aes-min.js');
-importScripts('./lib/CryptoJS/sha1-min.js');
-importScripts('./lib/CryptoJS/sha256-min.js');
+importScripts('./lib/CryptoJS/x64-core-min.js');
+importScripts('./lib/CryptoJS/sha512.js');
+importScripts('./lib/CryptoJS/sha384.js');
+importScripts('./lib/CryptoJS/sha1.js');
+importScripts('./lib/CryptoJS/sha256.js');
 importScripts('./lib/CryptoJS/hmac-min.js');
 // jsbn requirements
 importScripts('./lib/jsbn.js');
@@ -24,7 +28,6 @@ Impl.extend({
     buffer: null,
 
     create: function worker_verify_create(args) {
-        console.log("entered worker_verify_create");
         'use strict';
         
         // Verify and cache parameters
@@ -33,13 +36,16 @@ Impl.extend({
         this.signature = args['signature'];
         var algoName = this.algoName(this.algorithm);
         
-        if (!this.key) { 
+        if(!this.key)
+        {
             this.die('Key must be provided');
             return;
-        } else if (!this.algorithm) {
+        } else if(!this.algorithm)
+        {
             this.die('Algorithm must be provided');
             return;
-        } else if (!this.signature) {
+        } else if(!this.signature)
+        {
             this.die('Signature must be provided');
             return;
         }
@@ -80,6 +86,8 @@ Impl.extend({
                 switch (this.algorithm.params.hash) {
                     case 'SHA-1':
                     case 'SHA-256':
+                    case 'SHA-384':
+                    case 'SHA-512':
                         break;
                     default:
                         this.die('Unsupported hash algorithm ' + this.algorithm.params.hash);
@@ -107,21 +115,24 @@ Impl.extend({
         // If there is data, process it and finish
         this.buffer = "";
         if (('buffer' in args) && util.isABV(args['buffer']) 
-             && (args['buffer'].byteLength > 0)) {
+             && (args['buffer'].byteLength > 0))
+        {
             this.process(args);
             this.finish();
         }
+        else
+            console.log("worker_verify: NOT run to process");
     },
 
     process: function process(args) {
-        if (!this.alive) { return; }
+        if(!this.alive) { return; }
         if ('buffer' in args) {
             this.buffer += util.abv2hex(args['buffer']);
         }
     },
 
     finish: function finish(args) {
-        if (!this.alive) { return; }
+        if(!this.alive) { return; }
 
         // Takes no arguments
         var data = util.hex2abv(this.buffer);
@@ -138,6 +149,14 @@ Impl.extend({
 
                     case 'SHA-256':
                         hash = libpolycrypt.hmac_sha256(this.key.key, data);
+                        break;
+
+                    case 'SHA-384':
+                        hash = libpolycrypt.hmac_sha384(this.key.key, data);
+                        break;
+
+                    case 'SHA-512':
+                        hash = libpolycrypt.hmac_sha512(this.key.key, data);
                         break;
                 }
                 
