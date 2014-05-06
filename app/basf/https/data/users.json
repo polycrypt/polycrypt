@@ -1,0 +1,29 @@
+{
+    "userd@dmail.com": {
+        "username": "userd@dmail.com",
+        "prev_signins": [],
+        "challenged_pubkeys": [],
+        "pubkeys": [],
+        "pass_hash": "780a158d5e37f87b4ed5e937cc286e0c74fd6879b41ab9e8be3abfc3a6f6b68d",
+        "salt": "701e695d46e52fb4cfe146a88b6f5c80c10a941cd27246355f21ae39f05ca9bb"
+    },
+    "usera@amail.com": {
+        "username": "usera@amail.com",
+        "prev_signins": [],
+        "challenged_pubkeys": [],
+        "pass_plain": "passa",
+        "pubkeys": [
+            {
+                "spki_b64": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx/Kd09hO9cUE9TLporRn2u7GLnAjzUTCI/N0KJAO07bLg0D5GyudDddoFt/Wqy50rXK+ToI2oa2O5aNsHEQVHKkK8UdbOLe6GKJWsfyfWYNTcrYn/u3SLolwN7SEMZ74I9kZ2/cKkCAvsRop/lnuRJbtTdDfW3heI9mDujM3HuuWlZfBWrdmuQgu7lYW4ybfPs5/hq183lyfSktbdJG+3d4kw6/x9Tq1ErJ9zFcY1VaEmeqoFDbUKJVX+yWuKO0YWrB8rIIhuvkqYuXB4aLX+3aorV7kpgtnmjkLR+gk3DhXAHbM/073v1lgxPK1X9GWGg401CRMyulyhX7s/gmi0QIDAQAB"
+            },
+            {
+                "spki_b64": "MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQBjXwzsNFb0M8w969TDt7nqixt5dRBN-mY2G4637hurZP7Cg-KOwT1_fuii2EgyS1kf2Pu95Nl7fAprl4jW3G_CDqmGzqZHcKUc2c98m7RdnMpUXXuLZO5haeuzUBPDiqUMP5oU9GK_51cLJFoYn2XDKdUoA1X4QE3eYY0mvShRk6JYdjuYhlUfEoFxn7_2wo1sYGR_ESfeuP1bpuN8y23dKSwHIlAnP2KQRexZG_W1SThZY9jacOXuCZ742FkOtu8Taft2HlUOj-3hmq3JM3D0RU0LS44buBLZSUnvO4Z08Wm2MC8L6IU-9eyAjprQzzFD55YdurirNstEb_ooqTIVAgMBAAE="
+            },
+            {
+                "spki_b64": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn1Ve6UmfXc1GICp249onr20eAPJ9T-04rpOSvpfK_cV1jmHsG-xNM0d-aZTeeh1d6EWqzFb6Q0qQIUMT6tcNtFJGLko5o41m4H6yH0t3ebzK3djCrDqqmcq3audfReABS99udEKbdHR72ZsNlPf6ie7vKWBAF2hJe72wyA7p6WPSzF6Rmkrn-uHK_7zMsuqgwOUOxTR6TiqBxuZ9Js-PeJT3xeyzsFyxOlhqbKAmf4tFNGQafYhHWbN_h21b1xrf_luTTgDgXMlY7kxL5cG8LploFdobdB6xTgCaOPoPStuJQWa3s4jfYYierJm1cEJgQnQYK6fSuxJzExWMkdAlTQIDAQAB"
+            }
+        ],
+        "pass_hash": "2c71773372e046e3b341244bf3fbc72523b75f916b59f3eee48450e54d58e78d",
+        "salt": "b5e0890cf0af584bc421dc6f52c8126252c9a92e5ad9bbe87dff92786284f3b4"
+    }
+}

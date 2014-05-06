@@ -1,0 +1,4 @@
+msg = ['<div class="user">',
+            '<h1>For {{user}}, password matches.</h1>',
+            '<h2>Sign in successful, using {{new_or_old}} key.</h2>',
+            '</div>']

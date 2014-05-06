@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<!-- The default page for https. -->
+
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>home</title>
+    <style>
+        #signin { background: #bbb; color: #fff; padding: 5px; }
+        #content { border: 1px solid #ddd; height: 100px; padding: 5px; }
+    </style>
+</head>
+<body style='font-family: Monospace; width: 800px;'>
+    <div id='signin'>Not signed in.
+        <a href='http://localhost:4343/cgi/signin.py'>signin</a>
+    </div>
+
+    <div id='content'>
+        Content available to unauth users, with ssl.
+        <br>
+        <span style='font-size:200%;'>Website for:</span><br>
+        <a href='http://localhost:8002/html/shoes.html'>shoes</a><br>
+        <a href='http://localhost:8002/html/hats.html'>hats</a><br>
+        <a href='http://localhost:8002/html/jackets.html'>jackets</a>
+    </div>
+</body>
+</html>
+

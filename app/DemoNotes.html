@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>DemoNotes</title>
+  <style type="text/css">code{white-space: pre;}</style>
+</head>
+<body>
+<div id="TOC">
+<ul>
+<li><a href="#demo-notes">Demo Notes</a><ul>
+<li><a href="#general">General</a></li>
+<li><a href="#basicauthentication">BasicAuthentication</a></li>
+<li><a href="#graymail">GrayMail</a></li>
+<li><a href="#polycrypt-subtlecrypto">PolyCrypt / SubtleCrypto</a></li>
+<li><a href="#browser-as-a-second-factor">Browser as a Second Factor</a></li>
+<li><a href="#hello-world-demos">Hello-World Demos</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id='content'>  <!-- my addition -->
+<h1 id="demo-notes"><a href="#demo-notes">Demo Notes</a></h1>
+<h2 id="general"><a href="#general">General</a></h2>
+<ol style="list-style-type: decimal">
+<li>All Demo software should be run from a Unix type machine with <code>bash</code> and a relatively modern version of <code>Python</code> (eg <code>&gt;= 2.6</code>). They have been tested on Linux and Mac OS X machines. If you are using another platform, you will have to modify some of the installation instructions. For best results, use a Linux VM.</li>
+<li>You must have the PolyCrypt repository checked out for the demos to work (or just possess the source code). Even demos that do not use PolyCrypt to perform cryptographic operations still use its utility features.</li>
+<li>The demos require that you modify your hosts file (typically <code>/etc/hosts</code>) to include: <code>127.0.0.1 polycrypt-test</code></li>
+<li>You need to run <code>./tool/webservers.sh src/</code> from the <code>PolyCrypt</code> directory.</li>
+<li><p>You need to run the following command from the App repository:</p>
+<p>python -m SimpleHTTPServer 8002 .</p></li>
+<li>All of the SubtleCrypto demos should be run using our modified version of nightly.</li>
+<li>You will need to install the Gemalto drivers on your machine so that Nightly can use the Gemalto smart card.</li>
+<li><p>You will need to load the <code>.dll/.dylib/.so</code> Gemalto library into Nightly. This is found in the <code>gemalto</code> section of the DVD. Open nightly, go to Preferences and then to Security Devices, then you just need to load your <code>.dll/.dylib/.so</code> file so Firefox knows where it is.</p></li>
+</ol>
+<h2 id="basicauthentication"><a href="#basicauthentication">BasicAuthentication</a></h2>
+<p>This is our offline version of Token authentication. You must have the provided Gemalto smart card in the machine for it to work. You must also be using our distribution of Firefox. The app will connect to the server that you set up (internet or local apache instance) and then clients can authenticate to the server using the plugged in smart card.</p>
+<h2 id="graymail"><a href="#graymail">GrayMail</a></h2>
+<p>This is our encrypted chat demo. It is designed to be run from a webserver (can be a local webserver, but not <code>SimpleHTTPServer</code> or <code>CGIHTTPServer</code>). It allows two parties to securely communicate using the Web Crypto API (PolyCrypt). See the readme file in the <code>../app/graymail</code> directory for more information.</p>
+<h2 id="polycrypt-subtlecrypto"><a href="#polycrypt-subtlecrypto">PolyCrypt / SubtleCrypto</a></h2>
+<p>This demo showcases the completed functionality of SubtleCrypto as well as to compare how PolyCrypt and SubtleCrypto perform.</p>
+<h2 id="browser-as-a-second-factor"><a href="#browser-as-a-second-factor">Browser as a Second Factor</a></h2>
+<p>This is a more detailed example of authenticating to a webserver using either a smart card, or using keys stored in the browser. This demo does not require a <code>MySQL</code> database installation. It does depend on <code>bash</code> and <code>python</code>. This requires the modified version of Firefox and the Gemalto smart card. Steps:</p>
+<pre><code>$ cd repo-polycrypt
+$ tools/webservers.sh &lt;path-to-app-dir&gt;
+
+$ cd app/basf/https
+$ ./webserver.py</code></pre>
+<p>Browse to <code>http://localhost:8000</code> and click on <code>Browser as a Second Factor</code>. This shows a few sample pages that can be reached outside of SSL. Click <code>signin</code> to get to what would be an SSLed connection on a real website. Since PolyCrypt must be at a different origin, it was not worth setting up an SSL connection back to it for this demo. However, once the browser does the crypto instead of PolyCrypt, this hurdle is removed.</p>
+<p>The top portion of the signin page represents what a user might see. The bottom portion, below the horizontal line, is additional information, that a developer might care about, shown for demonstration purposes. On the signin page, you may create a new user, or use a prepopulated one with email: <code>usera@amail.com</code> and password: <code>passa</code>. Once the email and password are entered, you can click the <code>software sign</code> button. Alternately, if the smart card is plugged in, you can click the <code>hardware sign</code> button. If Firefox prompts you for the password for the smart card, enter <code>0000</code> (four zeroes). You should see various items fill in. Then, click <code>sign in</code>.</p>
+<p>The next page might show that you are signed in (if the browser of smart card has previously been registered). Otherwise, there is one more signin step. At the top of the page, find the pin that was generated and submit it.</p>
+<p>The next page shows the results. At this point, the user is signed in to the account. You can create new users and add (keypairs to) browsers for existing users.</p>
+<p>You can manually edit the user database in <code>basf/https/data/users.json</code>.</p>
+<h2 id="hello-world-demos"><a href="#hello-world-demos">Hello-World Demos</a></h2>
+<p>Each of these demos showcases a particular operation (encrypt, sign/verify, hash, chat) that can be accomplished either using PolyCrypt or SubtleCrypto.</p>
+</div>  <!-- my addition -->
+
+</body>
+</html>

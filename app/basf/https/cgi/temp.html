@@ -1,0 +1,70 @@
+Content-Type: text/html
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>cookie temp</title>
+<link rel='stylesheet' type='text/css' href='/style.css'>
+<script>
+
+function log(logtype, msg) {
+    document.getElementById(logtype).innerHTML += msg + '<br>';
+    if (logtype === 'err') {
+        document.getElementById('err').style.display = 'block';
+    }
+}
+
+function init() {
+    showTimestamp();
+}
+
+function showTimestamp() {
+    var ts = getTimestamp();
+    log('out', 'ts:  ' + ts);
+
+    setTimeout(showTimestamp, 3000);
+}
+
+function getTimestamp() {
+    var cooks = document.cookie.split(';');
+    for (var ii = 0; ii < cooks.length; ii++) {
+        var cook = cooks[ii].trim();
+        var content = cook.split('=');
+        if (content[0] === 'heartbeat') {
+            return content[1];
+        }
+    }
+    return null;
+}
+
+function reqNewCookie() {
+    var req = new XMLHttpRequest();
+    req.open('HEAD', 'http://localhost:4343/cgi/new_cookie.py', true);
+    req.send();
+}
+
+window.onload = init;
+
+</script>
+</head>
+<body>
+    <div class='user'>
+        <h1>Generic page content.</h1>
+        <h2>More generic page content.</h2>
+    </div>
+    <hr>
+
+    <!-- form items below here are shown differently -->
+    <div id='form_hidden' class='demo'>
+        <button type='button' onclick='reqNewCookie()'>req new cookie</button><br>
+    </div>
+
+    <div id='out' class='demo'></div>
+
+    <div id='err' class='demo' style='display: none;'>_____ error _____<br></div>
+
+</body>
+</html>
+
+

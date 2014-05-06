@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>PolyCrypt: A WebCrypto Polyfill</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="./demo.css"/>
+<script src="http://polycrypt-test:8001/front/polycrypt.js"></script>
+<script src="http://polycrypt-test:8001/common/util.js"></script>
+<script src="./TestVectors.js"></script>
+<script src="./test-array.js"></script>
+<script src="./demo-tests.js"></script>
+</head>
+
+<body>
+
+<div id="content">
+	<div id="head">
+		Poly<b>Test</b><br>
+	</div>
+
+    <div id="start" onclick="start();">START</div>
+
+    <div id="resultDiv" class="content" style="display: none;">
+    Summary:
+    <span class="pass"><span id="passN">0</span> passed, </span>
+    <span class="fail"><span id="failN">0</span> failed, </span>
+    <span class="pending"><span id="pendingN">0</span> pending.</span>
+    <br/>
+    <br/>
+
+    <table id="results">
+        <tr>
+            <th>Test</th>
+            <th>Result</th>
+            <th>Time</th>
+        </tr>
+    </table>
+
+    </div>
+
+    <div id="foot"></div>
+</div>
+
+</body>
+</html>

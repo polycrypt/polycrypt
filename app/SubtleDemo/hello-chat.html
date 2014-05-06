@@ -1,0 +1,59 @@
+<html>
+    <title>
+        Hello Chat
+    </title>
+    <head>
+        <script src="http://polycrypt-test:8001/common/util.js"></script>
+        <script src='./api.js'></script>
+    </head>
+    <script>
+
+    </script>
+    <body>
+        <div id='peer1' style='float:left'>
+            <center>
+            Alice
+            </center>
+            <table id='t1'>
+                <tr>
+                    <td>Sent Message</td>
+                    <td><input id='plaintext1' style='width:400px' onkeyup="SendChatMessage('1','2');"></input></td>
+                </tr>
+                <tr>
+                    <td>Sent Ciphtertext</td>
+                    <td><input id='ciphertext1' style='width:400px' disabled></input><td>
+                </tr>
+                <tr>
+                    <td>Received Ciphertext</td>
+                    <td><input id='rCiphertext1' style='width:400px' disabled></input></td>
+                </tr>
+                <tr>
+                    <td>Received Message</td>
+                    <td><input id='rPlaintext1' style='width:400px' disabled></input></td>
+                </tr>
+            </table>
+        </div>
+        <div id='peer2' style='float:right;'>
+            <center>
+            Bob
+            </center>
+            <table id='t2'>
+                <tr>
+                    <td>Sent Message</td>
+                    <td><input id='plaintext2' style='width:400px' onkeyup="SendChatMessage('2','1');"></input></td>
+                </tr>
+                <tr>
+                    <td>Sent Ciphtertext</td>
+                    <td><input id='ciphertext2' style='width:400px' disabled></input><td>
+                </tr>
+                <tr>
+                    <td>Received Ciphertext</td>
+                    <td><input id='rCiphertext2' style='width:400px' disabled></input></td>
+                </tr>
+                <tr>
+                    <td>Received Message</td>
+                    <td><input id='rPlaintext2' style='width:400px' disabled></input></td>
+                </tr>
+            </table>        </div>
+    </body>
+</html>

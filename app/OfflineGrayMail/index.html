@@ -1,0 +1,292 @@
+<html>
+
+<head>
+<title>GrayMail</title>
+<script src="http://polycrypt-test:8001/front/polycrypt.js"></script>
+<script src="http://polycrypt-test:8001/common/util.js"></script>
+<script src="./jquery.min.js"></script>
+<script src="./chat.js"></script>
+
+<script>
+var steps = [
+    "userPublic",
+    "otherPublic",
+    "userNonce",
+    "otherNonce",
+    "userPassword",
+    "conversation"
+];
+
+var labels = [
+    "publicKeyLabel",
+    "otherPublicKeyLabel",
+    "userNonceLabel",
+    "otherNonceLabel",
+    "userPasswordLabel"
+]
+
+var newLabels = [
+    "User Public Key",
+    "Other Public Key",
+    "User Nonce",
+    "Other Nonce",
+    "Password"
+]
+
+var buttons = [
+    "userPublicButton",
+    "otherPublicButton",
+    "userNonceButton",
+    "otherNonceButton",
+    "userPasswordButton"
+]
+
+var inputs = [
+    "upkb",
+    "opkb",
+    "unb",
+    "onb",
+    "pwb"
+]
+var currentStep = -1;
+
+var advanceStep = function() {
+    if (currentStep > -1) { 
+        $("#" + labels[currentStep]).text(newLabels[currentStep]);
+        $("#" + buttons[currentStep]).hide();
+    }
+    
+    currentStep++;
+    $("#working").hide();
+    
+    if (currentStep < steps.length) { 
+        $("#" + steps[currentStep]).fadeIn(); 
+    }
+
+    var currButton = $("#" + inputs[currentStep])[0];
+    
+    if (currButton != null) {
+        currButton.focus()
+        currButton.selectionStart = 0;
+        currButton.selectionEnd = currButton.value.length;
+    }
+};
+
+var error = function(element, msg) {
+    console.log(element);
+    $(element).text(msg);
+    $("#working").hide();
+}
+
+var finish = function() {
+    for (var i = 0; i < steps.length; i++) {
+        $("#" + steps[i]).hide();
+    }
+    $("#error").hide();
+}
+
+$(document).ready(function() {
+    $("#nojs").hide();
+    
+    $("#userPublicButton").click(advanceStep);
+    $("#otherPublicButton").click(function() { 
+        $("#working").fadeIn();
+        encryptNonce(advanceStep, error, "#otherPublicKeyLabel"); 
+    });
+    $("#userNonceButton").click(advanceStep);
+    $("#otherNonceButton").click(advanceStep);
+    $("#userPasswordButton").click(function() {         
+        $("#working").fadeIn();
+        go(function() {
+            console.log("calling last function!");
+            finish();
+            $("#myTable").fadeIn();
+            $("#conversation").fadeIn();
+        }, error, "userPasswordLabel"); 
+    });
+
+    $("#encryptButton").click(encrypt);
+    $("#decryptButton").click(decrypt);
+
+    $("#userPlaintext").keyup(encrypt);
+    $("#otherCiphertext").keyup(decrypt);
+
+
+    $("#userPublic").hide();
+    $("#otherPublic").hide();
+    $("#userNonce").hide();
+    $("#otherNonce").hide();
+    $("#userPassword").hide();
+    $("#conversation").hide();
+
+    startCrypto(advanceStep);
+});
+</script>
+<style>
+body {
+    font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    background: #dcdcdc;
+    color: black;
+    line-height: 150%;
+}
+
+div, table {
+    width: 30em;
+    margin: 0 auto;
+    padding: 1em;
+    text-align: center;
+}
+
+div.invisible {
+    display: none;
+}
+
+table.invisible {
+    display: none;
+}
+
+input, textarea {
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 120%;
+    width: 20em;
+    padding: .5em;
+}
+
+button {
+    background-color:#b0b;
+    border:1px solid black;
+    border-radius:6px;
+    display:inline-block;
+    color:#ffffff;
+    font-family:arial;
+    font-size:15px;
+    font-weight:bold;
+    width: 10em;
+    opacity: 0.5;
+}
+
+textarea {
+    width: 20em;
+    height: 15em;
+}
+
+td {
+    padding: .5em;
+    text-align: center;
+    font-weight: bold;
+}
+
+table {
+    width: 40em;
+}
+
+#encryptButton, #decryptButton {
+    cursor: pointer;
+    background: #b0b;
+    color: black;
+    padding: .5em;
+}
+
+#head {
+    border-bottom: 3px solid #b0b;
+    padding-bottom: .1em;
+    text-align: left;
+    font-size: 300%;
+    width: 10em;
+    padding: .2em;
+    font-weight: lighter;
+}
+
+#head b {
+    font-weight: bold;
+    color: #b0b;
+}
+
+.red {
+    background: #ffffff;
+}
+
+.black {
+    background: #999;
+}
+
+#nojs {
+    font-size: 250%;
+    font-weight: bold;
+    color: #b0b;
+}
+
+</style>
+</head>
+
+<body>
+
+<center>
+    <div id="head">
+        Gray<b>Mail</b>
+    </div>
+</center>
+
+<div id="nojs">
+    You must enable JavaScript
+</div>
+
+<div id="working" class = "invisible">
+    ...WORKING...
+</div>
+
+<div id="userPublic" class = "invisible">
+    <label id = "publicKeyLabel">Send your public key to the other side:</label>
+    <br/><input type="text" id="upkb"/>
+    <br/><button id="userPublicButton">Go</button>
+</div>
+
+<div id="otherPublic" class = "invisible">
+    <label id = "otherPublicKeyLabel">Now paste their public key here:</label>
+    <br/><input type="text" id="opkb"/>
+    <br/><button id="otherPublicButton">Go</button>
+</div>
+
+<div id="userNonce" class = "invisible">
+    <label id = "userNonceLabel">Send this encrypted nonce to the other side:</label>
+    <br/><input type="text" id="unb"/>
+    <br/><button id="userNonceButton">Go</button>
+</div>
+
+<div id="otherNonce" class = "invisible">
+    <label id = "otherNonceLabel">Now paste their encrypted nonce here:</label>
+    <br/><input type="text" id="onb"/>
+    <br/><button id="otherNonceButton">Go</button>
+</div>
+
+
+<div id="userPassword" class = "invisible">
+    <label id = "userPasswordLabel">Enter the password here (if you have one):</label>
+    <br/><input type="text" id="pwb"/>
+    <br/><button id="userPasswordButton">Go</button>
+</div>
+
+<table id="conversation" class = "invisible">
+    <tr>
+        <td>ME</td>
+        <td>THEM</td><D-r>
+    </tr>
+    <tr>
+        <td><textarea id="userPlaintext" class="red"></textarea></td>
+        <td><textarea id="otherCiphertext" class="black"></textarea></td>
+    </tr>
+    <tr>
+        <td><span id="encryptButton">&darr; ENCRYPT &darr;</span></td>
+        <td><span id="decryptButton">&darr; DECRYPT &darr;</span></td>
+    </tr>
+    <tr>
+        <td><textarea id="userCiphertext" class="black" disabled></textarea></td>
+        <td><textarea id="otherPlaintext" class="red" disabled></textarea></td>
+    </tr>
+</table>
+
+
+</body>
+</html>

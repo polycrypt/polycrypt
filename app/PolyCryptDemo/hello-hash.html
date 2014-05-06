@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://polycrypt-test:8001/common/util.js"></script>
+<script src="http://polycrypt-test:8001/front/polycrypt.js"></script>
+<script>
+
+function go() {
+    var hello = util.str2abv("Hello world!");
+    var op = window.polycrypt.digest("SHA-256", hello);
+    op.oncomplete = function(e) {
+        var hex = util.abv2hex(e.target.result);
+        document.getElementById("hash").innerHTML = hex;
+    }
+    op.onerror = function(e) {
+        console.log("error");
+    }
+}
+
+function setup() {
+    document.getElementById("go").innerHTML = go.toString();
+    go();
+}
+
+/**
+ * The util. version uses a Uint8Array constructor, which does not work with
+ * the proxy ArrayBufferView object that Firefox passes to the content page.
+ */
+function abv2hex (abv) {
+    var hex = "";
+    for (var i = 0; i < abv.length; ++i) {
+        var zeropad = (abv[i] < 0x10) ? "0" : "";
+        hex += zeropad + abv[i].toString(16);
+    }
+    return hex;
+}
+
+if (window.polycrypt.polyfill) {
+    window.polycrypt.onalive = setup;
+} else {
+    util.abv2hex = abv2hex;
+    window.onload = setup;
+}
+
+</script>
+<style>
+pre {
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 1ex;
+}
+</style>
+</head>
+
+<body style="font-family: Monospace;">
+
+<p>The SHA-256 hash of the string <b>"Hello world!"</b> is: <b id="hash">...</b></p>
+
+<hr/><code><pre id="go"></pre></code>
+
+</body>
+</html>
+

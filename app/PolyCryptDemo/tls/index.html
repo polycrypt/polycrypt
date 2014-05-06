@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>PolyCrypt Self-Signed Certificate Generator</title>
+
+<!-- PolyCrypt -->
+<script src="http://polycrypt-test:8001/front/polycrypt.js"></script>
+<script src="http://polycrypt-test:8001/common/util.js"></script>
+
+<!-- 1. X.509 requirements (all for transcoding, no crypto) -->
+<script src="./forge/util.js"></script>
+<script src="./forge/jsbn.js"></script>
+<script src="./forge/oids.js"></script>
+<script src="./forge/asn1.js"></script>
+<script src="./forge/rsa.js"></script>
+<script src="./forge/pki.js"></script>
+
+<!-- 2. Requirements for PKCS12 -->
+<!-- 2.1. Requirements for RNG -->
+<script src="./forge/sha1.js"></script>
+<script src="./forge/aes.js"></script>
+<script src="./forge/prng.js"></script>
+<script src="./forge/random.js"></script> 
+<!-- 2.2. Required for PKCS12 PBE -->
+<script src="./forge/des.js"></script>
+<!-- 2.3. Required for PKCS12 MacData -->
+<script src="./forge/hmac.js"></script>
+<script src="./forge/pkcs12.js"></script>
+
+<!-- local processing -->
+<script src="./cert-factory.js"></script>
+<script src="./x509.js"></script>
+
+<link rel="stylesheet" href="./x509.css">
+
+</head>
+
+<body>
+<div id="content">
+
+<div id="head">Quick <b>Server</b> Certs</div>
+
+    <table class="disabled">
+        <tr>
+            <td>Host name:</td>
+            <td><input type="text" id="dnsname"/></td>
+        </tr>
+    </table>
+<p class="on" style="cursor: pointer" onclick="go()">START</p>
+<p class="off" id="gen">Generating key pair...</p>
+<p class="off" id="sig">Signing certificate...</p>
+<p class="off" id="ver">Verifying certificate...</p>
+
+<!-- Display results here -->
+<table class="hidden" id="done">
+    <tr>
+        <th>The Cert:</th>
+    </tr>
+    <tr>
+        <td><a id="certPEM" download="cert.pem">.PEM</a></td>
+    </tr>
+    <tr>
+        <td><a id="certDER" download="cert.cer">.DER</a></td>
+    </tr>
+</table>
+
+</div>
+</body>
+
+</html>

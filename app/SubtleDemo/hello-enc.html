@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://polycrypt-test:8001/common/util.js"></script>
+<script src="http://polycrypt-test:8001/front/polycrypt.js"></script>
+<script src="./TestVectors.js"></script>
+<script>
+
+var KEY_DATA, IV_DATA, ALGORITHM, KEY, INPUT, OUTPUT_C, OUTPUT_P; // set at load
+function init() {
+    // Grab handles to DOM objects
+    INPUT = document.getElementById("INPUT");
+    OUTPUT_C = document.getElementById("OUTPUT_C");
+    OUTPUT_P = document.getElementById("OUTPUT_P");
+
+    // Import the key
+    window.crypto.token.deleteSymKey("Hello-Enc Test Key");
+    KEY = window.crypto.subtle.importKey(["secret"], ["raw"], tv.t15_key, "aes-cbc", "Hello-Enc Test Key", false, 3);
+
+    // Display the code
+    document.getElementById("go").innerHTML = go.toString();
+}
+
+// Pre-defined: ALGORITHM, KEY, INPUT, OUTPUT_C, OUTPUT_P
+function go() {
+  var pt = util.str2abv(INPUT.value);
+  if (pt.length == 0) {
+    OUTPUT_P.value = "";
+    OUTPUT_C.value = "";
+    return;
+  }
+
+  var enc = window.crypto.subtle.encrypt({name:"aes-cbc", iv:tv.t15_iv}, KEY, pt);
+  enc.onsuccess = function() {
+    OUTPUT_C.value = this.result;
+    var ct = util.hex2abv(this.result);
+
+    var dec = window.crypto.subtle.decrypt({name:"aes-cbc", iv:tv.t15_iv}, KEY, ct);
+    dec.onsuccess = function() {
+      OUTPUT_P.value = util.abv2str(util.hex2abv(this.result));
+    }
+
+    dec.onerror = function() {
+        console.log("decrypt: " + this.error.name);
+    }
+  }
+
+  enc.onerror = function() {
+    console.log("encrypt: " + this.error.name);
+  }
+}
+
+
+/**
+ * XXX: These are a hack around a bug in the Firefox extension
+ * The util. versions use a Uint8Array constructor, which does not work with
+ * the proxy ArrayBufferView object that Firefox passes to the content page.
+ */
+function abv2hex (abv) {
+    var hex = "";
+    for (var i = 0; i < abv.length; ++i) {
+        var zeropad = (abv[i] < 0x10) ? "0" : "";
+        hex += zeropad + abv[i].toString(16);
+    }
+    return hex;
+}
+function abv2str (abv) {
+    var u8 = new Uint8Array(abv.byteLength);
+    var i, str = "";
+    for (i = 0; i < abv.byteLength; i++) {
+        u8[i] = abv[i];
+    }
+    var u16 = new Uint16Array(u8);
+    for (i=0; i<u16.length; ++i) {
+        str += String.fromCharCode(u16[i]);
+    }   
+    return str;
+}
+
+if (window.polycrypt.polyfill) {
+    window.polycrypt.onalive = init;
+} else {
+    util.abv2hex = abv2hex;
+    util.abv2str = abv2str;
+    window.onload = init;
+}
+
+</script>
+<style>
+pre {
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 1ex;
+}
+</style>
+</head>
+
+<body style="font-family: Monospace;">
+
+<table>
+    <tr>
+        <td>INPUT:</td>
+        <td><input id="INPUT" type="text" size="100" onkeyup="go();"></td>
+    </tr>
+    <tr>
+        <td>OUTPUT_C:</td>
+        <td><input id="OUTPUT_C" type="text" size="100" disabled></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>OUTPUT_P:</td>
+        <td><input id="OUTPUT_P" type="text" size="100" disabled></td>
+        <td></td>
+    </tr>
+</table>
+
+<hr/><code><pre id="go"></pre></code>
+
+</body>
+</html>
+

@@ -1,0 +1,367 @@
+Content-Type: text/html
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>{{title}}</title>
+<!-- <script src="http://polycrypt-test:8001/common/util.js"></script>
+     <script src="http://polycrypt-test:8001/front/polycrypt.js"></script>
+-->
+<script src="http://localhost:8001/common/util.js"></script>
+<script src="http://localhost:8001/front/polycrypt.js"></script>
+<link rel='stylesheet' type='text/css' href='/style.css'>
+<script>
+
+var browserImplDetected = false;
+var hwTokenDetected = false;
+var swKey = {
+    keypair:  null,
+    keypairName:  null
+}
+
+function log(logtype, msg) {
+    document.getElementById(logtype).innerHTML += msg + '<br>';
+    if (logtype === 'err') {
+        document.getElementById('err').style.display = 'block';
+    }
+}
+
+function getField(elementId) {
+    return document.getElementById(elementId).value;
+}
+
+function setField(elementId, value) {
+    document.getElementById(elementId).value = value;
+}
+
+function init(caller, retCode, retVal) {
+    setField('hwTokenDetected', 'False');
+    detectBrowserImpl();
+    detectHardwareToken();
+    updateEmail();
+}
+
+function looksLikeEmail(text) {
+    var firstAt = text.indexOf('@');
+    var lastAt = text.lastIndexOf('@');
+    var lastDot = text.lastIndexOf('.');
+    if ((firstAt != lastAt) ||
+            (firstAt < 1) ||
+            (firstAt + 2 >= lastDot) ||
+            (lastDot + 2 >= text.length)) {
+        return false;
+    }
+    return true;
+}
+
+function updateEmail() {
+    email = getField('email');
+    if (looksLikeEmail(email)) {
+        swKey.keypairName = 'keypair_' + email;
+        setField('email', email);
+        document.getElementById('swButton').disabled = false;
+        if (hwTokenDetected) {
+            document.getElementById('hwButton').disabled = false;
+        }
+    } else {
+        document.getElementById('swButton').disabled = true;
+        document.getElementById('hwButton').disabled = true;
+    }
+}
+
+function useSwKey(caller, retCode, retVal) {
+    if (caller === undefined) {  // the initial entry to this function
+        document.getElementById('email').readOnly = true;
+        document.getElementById('password').readOnly = true;
+        loadKeypair(useSwKey, swKey.keypairName);
+    }
+
+    if (caller === 'loadKeypair') {
+        if (retCode === 'SUCCESS') {
+            log('out', 'useSwKey:  Got keypair from localStorage.');
+            swKey.keypair = JSON.parse(retVal);
+            exportSwKey(useSwKey, swKey.keypair);
+        } else {
+            log('out', 'useSwKey:  Did not get keypair from localStorage.');
+            genKeypair(useSwKey);
+        }
+    }
+
+    if (caller === 'genKeypair') {
+        if (retCode === 'SUCCESS') {
+            log('out', 'useSwKey:  Generated keypair.');
+            swKey.keypair = retVal;
+            //log('out', 'calling saveKeypair with:  ' + swKey.keypairName);
+            saveKeypair(useSwKey, swKey.keypairName, JSON.stringify(swKey.keypair));
+            exportSwKey(useSwKey, swKey.keypair);
+        } else {
+            log('err', 'useSwKey:  No keypair!');
+        }
+    }
+
+    if (caller === 'saveKeypair') {
+        if (retCode === 'SUCCESS') {
+            log('out', 'useSwKey:  Saved keypair to localStorage.');
+        } else {
+            log('err', 'useSwKey:  Failed to save keypair to localStorage.');
+        }
+    }
+
+    if (caller === 'exportSwKey') {
+        if (retCode === 'SUCCESS') {
+            log('out', 'useSwKey:  Exported pubkey.');
+            swSign(useSwKey, prepNonce(), swKey.keypair.privateKey);
+        } else {
+            log('err', 'useSwKey:  No exported pubkey!');
+        }
+    }
+
+    if (caller === 'swSign') {
+        if (retCode === 'SUCCESS') {
+            log('out', 'useSwKey:  Signed nonce.');
+            document.getElementById('submitButton').disabled = false;
+        } else {
+            log('err', 'useSwKey:  Failed to sign nonce.');
+        }
+    }
+
+    document.getElementById('swButton').disabled = true;
+    document.getElementById('hwButton').disabled = true;
+}
+
+function useHwKey(caller, retCode, retVal) {
+    if (caller === undefined) {
+        document.getElementById('email').readonly = true;
+        document.getElementById('password').readonly = true;
+        exportHwKey(useHwKey);
+    }
+
+    if (caller === 'exportHwKey') {
+        if (retCode === 'SUCCESS') {
+            log('out', 'useHwKey:  Exported pubkey.');
+            var nonce = prepNonce();
+            hwSign(useHwKey, nonce)
+        } else {
+            log('err', 'useHwKey:  No exported pubkey!');
+        }
+    }
+
+    if (caller === 'hwSign') {
+        if (retCode === 'SUCCESS') {
+            log('out', 'useHwKey:  Signed nonce.');
+            document.getElementById('submitButton').disabled = false;
+        } else {
+            log('err', 'useHwKey:  Failed to sign nonce.');
+        }
+    }
+
+    document.getElementById('hwButton').disabled = true;
+}
+
+function detectBrowserImpl() {
+    if (window.crypto.token && window.crypto.token.signNonce) {
+        browserImplDetected = true;
+        setField('browserImplDetected', 'True');
+    } else{
+        setField('browserImplDetected', 'False');
+        document.getElementById('hwButton').disabled = true;
+    }
+}
+
+function detectHardwareToken() {
+    if (!browserImplDetected) {
+        return;
+    }
+
+    if (window.crypto.token.getSPKI() !== '') {
+        hwTokenDetected = true;
+        setField('hwTokenDetected', 'True');
+    } else {
+        setField('hwTokenDetected', 'False');
+    }
+
+    //TODO: call myself every second
+}
+
+// returns string
+function loadKeypair(callback, key) {
+    var value = localStorage.getItem(key);
+    if (value === null) {
+        callback('loadKeypair', 'FAILURE');
+    } else {
+        callback('loadKeypair', 'SUCCESS', value);
+    }
+}
+
+// key, value must be strings
+function saveKeypair(callback, key, value) {
+    try {
+        //log('out', 'saving keypair under:  ' + key);
+        localStorage.setItem(key, value);
+        callback('saveKeypair', 'SUCCESS');
+    } catch (e) {
+        log('err', e.name + ':  ' + e.message);
+        callback('saveKeypair', 'FAILURE');
+    }
+}
+
+function genKeypair(callback) {
+    var alg = {
+        name: "RSASSA-PKCS1-v1_5",
+        params: {
+            modulusLength: 2048,
+            publicExponent: new Uint8Array([0x01, 0x00, 0x01])
+        }
+    };
+    var op = window.polycrypt.generateKey(alg, true, ['sign', 'verify']);
+    op.onerror = function (evt) {
+        log('err', 'genKeypair:  ' + JSON.stringify(evt));
+        callback('genKeypair', 'FAILURE');
+    };
+    op.oncomplete = function (evt) {
+        var keypair = evt.target.result;
+        //log('out', 'genKeypair:  ' + JSON.stringify(keypair));
+        callback('genKeypair', 'SUCCESS', keypair);
+    };
+}
+
+function exportSwKey(callback, keypair) {
+    var op = window.polycrypt.exportKey('jwk', keypair.publicKey);
+    op.onerror = function (evt) {
+        log('err', 'exportSwKey:  ' + JSON.stringify(evt));
+        callback('exportSwKey', 'FAILURE');
+    };
+    op.oncomplete = function (evt) {
+        var pubkey = evt.target.result;
+        setField('key_n', pubkey.n);
+        setField('key_e', pubkey.e);
+        callback('exportSwKey', 'SUCCESS');
+    };
+}
+
+function exportHwKey(callback) {
+    var spki_b64 = window.crypto.token.getSPKI();
+
+    if (spki_b64 === '' || spki_b64 === null) {
+        log('err', 'exportHwKey:  no hardware token found');
+        callback('exportHwKey', 'FAILURE');
+    } else {
+        setField('spki_b64', spki_b64);
+        callback('exportHwKey', 'SUCCESS', spki_b64);
+    };
+}
+
+function prepNonce() {
+    // get server nonce
+    var serverHex = getField('nonceServer')
+    while (serverHex.length < 8) {
+        serverHex = '0' + serverHex;
+    }
+
+    // generate client nonce
+    var nonceClientArray = new Uint32Array(1);
+    window.crypto.getRandomValues(nonceClientArray);
+    var nonceClient = nonceClientArray[0];
+    var clientHex = nonceClient.toString(16);
+    while (clientHex.length < 8) {
+        clientHex = '0' + clientHex;
+    }
+    setField('nonceClient', clientHex);
+
+    // concatenate the nonces
+    var concatHex = serverHex + clientHex;
+    concatHex = util.hex2abv(concatHex);
+
+    return concatHex;
+}
+
+function swSign(callback, nonce, privateKey) {
+    var op = window.polycrypt.sign({
+            name: 'RSASSA-PKCS1-v1_5',
+            params: { hash: 'SHA-1' }
+        }, privateKey, nonce);
+    op.onerror = function (evt) {
+        callback('swSign', 'FAILURE');
+    };
+    op.oncomplete = function (evt) {
+        var sig = evt.target.result;
+        var sig_b64 = util.b64encode(sig);
+        setField('sig_b64', sig_b64);
+        callback('swSign', 'SUCCESS');
+    };
+}
+
+function hwSign(callback, nonce) {
+    var sig = window.crypto.token.signNonce(nonce);
+
+    //TODO: what is c++ retval for failure?
+    if (sig === null) {
+        //TODO:  not useful to have `sig` here, since it is just null
+        log('err', 'hwSign: sig: ' + sig);
+        callback('hwSign', 'FAILURE');
+    } else {
+        var sig_b64 = util.b64encode(sig);
+        setField('sig_b64', sig_b64);
+        callback('hwSign', 'SUCCESS');
+    };
+}
+
+if (window.polycrypt && window.polycrypt.polyfill) {
+    window.polycrypt.onalive = init;
+} else {
+    log('err', "Can't see polycrypt");
+}
+
+</script>
+</head>
+<body>
+    <div id='wrapper'>
+        <form action='http://localhost:4343/cgi/process_signin.py' method='post'>
+            <div class='user'>
+                <h1>Sign In</h1>
+                <h2>What is your e-mail address?</h2>
+                <span class='bold indent'>My e-mail address:</span>
+                <input id='email' type='text' onchange='updateEmail()' name='email' {{value}}><br>
+                &nbsp;&nbsp;<input class='indent' type='checkbox' id='new_user' name='new_user' value='true'>
+                <span class='text'>&nbsp;this is a new account</span>
+                <h2>Enter a password</h2>
+                <span class='bold indent'>My password:</span>
+                <input id='password' type='password' name='password' value=''><br>
+                <button class='indent' id='submitButton' type='submit' disabled>sign in</button>
+            </div>
+            <hr>
+
+            <!-- form items below here are shown differently -->
+            <div id='form_hidden' class='demo'>
+                <button id='hwButton' type='button' onclick='useHwKey()'>hardware sign</button><span id='hwButtonNote'></span>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <button id='swButton' type='button' onclick='useSwKey()'>software sign</button><br>
+                browser hw impl detected: <input id='browserImplDetected' type='text'><br>
+                hw token detected: <input id='hwTokenDetected' type='text'><br>
+                nonceServer: <input id='nonceServer' type='text' name='nonceServer' value={{nonce_server}}><br>
+                nonceClient: <input id='nonceClient' type='text' name='nonceClient'><br>
+                n: <input id='key_n' type='text' name='key_n'><br>
+                e: <input id='key_e' type='text' name='key_e'><br>
+                spki_b64: <input id='spki_b64' type='text' name='spki_b64'><br>
+                sig_b64: <input id='sig_b64' type='text' name='sig_b64'><br>
+                {{known_emails}}
+                <!--
+                <br>
+                <a href='http://localhost:4343/cgi/temp.py'>do cookie</a>
+                -->
+            </div>
+        </form>
+    </div>
+    <br>
+
+    <div id='out' class='demo'></div>
+
+    <div id='err' class='demo' style='display: none;'>_____ error _____<br></div>
+
+    <div id='pyerr' class='demo' style='{{py_error_display}};'>_____ pyerr _____<br>
+        {{py_error}}
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <script src="js/polycrypt/polycrypt.js"></script>
+        <script src="js/polycrypt/common/util.js"></script>
+        
+        <script>
+            var nonce = {{nonce}};
+            var id = {{id}};
+            
+            var authenticate = function(nonce) {
+                console.log("Authenticating user " + id + " with nonce: " + nonce);   
+          
+                nonce = "" + nonce;
+                var oldNonce = nonce;
+                var len = oldNonce.length;
+                nonce = new ArrayBuffer(oldNonce.length);
+                nonce = new Uint8Array(nonce);
+
+                console.log("nonce: ");
+                console.log("len: " + len);
+                for (var i = 0; i < len; i++) {
+                    nonce[i] = oldNonce.charCodeAt(i);
+                }
+        
+                var result = window.crypto.token.signNonce(nonce);
+                
+                var spki = window.crypto.token.getSPKI();
+                var pkcs7sig = util.b64encode(result);
+
+                console.log("spki: " + spki);
+                console.log("pkcs7sig: " + pkcs7sig);
+
+                var post = new XMLHttpRequest();
+
+                post.onload = function(e) {
+                    console.log(this.responseText);  
+                    var loc = this.responseText.substring(7, this.responseText.indexOf(".py") + 3);
+                    window.location = loc + "?waitingId=" + id;
+                }
+                
+                post.open("POST", "authenticate.py", false);
+                post.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                post.send("waitingId=" + id + "&spki=" + encodeURIComponent(spki) + "&sig=" + (pkcs7sig));
+                
+            }
+
+            var fail = function(nonce) {
+                authenticate(nonce + 1337);
+            }
+        </script>
+    </head>
+
+    <body>
+        <center>
+            <div id = "welcome">
+                Welcome to our home page!
+            </div>
+
+            <br><br>
+
+            <div id = "auth">
+                <button type="button" onclick = "authenticate(nonce);">Authenticate</button>
+            </div>
+
+            <div id = "fail">
+                <button type="button" onclick = "fail(nonce);">Intentionally Fail</button>
+            </div>
+        </center>
+    </body>
+</html>

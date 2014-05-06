@@ -1,0 +1,61 @@
+
+body {
+    font-family:  verdana, sans-serif;
+}
+
+.user {
+    border-radius:  5px;
+    border:  2px solid #c9e1f4;
+    padding:  5px 0 10px 10px;
+    margin-right:  auto;
+    margin-left:  auto;
+    width:  530px;
+}
+
+.user > .text { font-size:  90%; }
+
+.demo { font-family:  Monospace; }
+
+h1,h2,h3,h4,h5,h6 {
+    color:  #e47911;
+    margin:  0.4em;
+    padding:  0;
+}
+
+h1 { font-size:  110%; }
+h2 { font-size:  90%; }
+h3 { font-size:  80%; }
+h4 { font-size:  70%; }
+h5 { font-size:  60%; }
+h6 { font-size:  50%; }
+
+.bold {
+    font-size:  90%;
+    font-weight:  700;
+}
+
+.indent { margin-left:  2em; }
+
+xsubmitButton {
+    border-radius:  5px;
+    margin:  10px 3px 10px 2em;
+    padding  0 29px 0 10px;
+    font-size:  12px!important;
+    display:  inline-block;
+    height:  24px;
+    cursor:  pointer;
+    background-color:  #f8b53f;
+    border:  1px solid black;
+    color:  black;
+    font-weight:  500;
+}
+
+button:disabled { color:  #ccc; }
+
+#form_hidden > input {
+    padding:  0;
+    border:  0;
+    margin:  0;
+    color:  #1a1;
+}
+

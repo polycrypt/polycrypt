@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://localhost:8001/front/polycrypt.js"></script>
+<script src="http://localhost:8001/common/util.js"></script>
+<script src="./promisecrypt.js"></script>
+<script>
+
+var KEY_DATA, IV_DATA, ALGORITHM, KEY, INPUT, OUTPUT_C, OUTPUT_P; // set at load
+window.polycrypt.onalive = function() {
+    // Define the key variables
+    KEY_DATA = new Uint32Array([0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f]);
+    IV_DATA  = new Uint32Array([0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f]);
+    ALGORITHM = { name: "AES-CBC", params: { iv: IV_DATA } };
+
+    // Grab handles to DOM objects
+    INPUT = document.getElementById("INPUT");
+    OUTPUT_C = document.getElementById("OUTPUT_C");
+    OUTPUT_P = document.getElementById("OUTPUT_P");
+
+    // Import the key
+    window.promisecrypt.importKey("raw", KEY_DATA)
+        .then( function(k) { KEY = k; } );
+}
+
+// Pre-defined: ALGORITHM, KEY, INPUT, OUTPUT_C, OUTPUT_P
+function go() {
+  var pt = util.str2abv(INPUT.value);
+
+  console.log(ALGORITHM, KEY, pt);
+  window.promisecrypt.encrypt(ALGORITHM, KEY, pt)
+    .then(function(ct) {
+      OUTPUT_C.value = util.abv2hex(ct);
+      return window.promisecrypt.decrypt(ALGORITHM, KEY, ct);
+    }).then(function(pt) {
+      console.log(pt)
+      OUTPUT_P.value = util.abv2str(pt);
+    });
+}
+</script>
+</head>
+
+<body style="font-family: Monospace;">
+
+<table>
+    <tr>
+        <td>INPUT:</td>
+        <td><input id="INPUT" type="text" size="100" onkeyup="go();"></td>
+    </tr>
+    <tr>
+        <td>OUTPUT_C:</td>
+        <td><input id="OUTPUT_C" type="text" size="100" disabled></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>OUTPUT_P:</td>
+        <td><input id="OUTPUT_P" type="text" size="100" disabled></td>
+        <td></td>
+    </tr>
+</table>
+
+</body>
+</html>
+
