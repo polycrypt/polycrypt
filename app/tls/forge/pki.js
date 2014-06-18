@@ -609,13 +609,13 @@ var PBES2AlgorithmsValidator = {
       type: asn1.Type.SEQUENCE,
       constructed: true,
       value: [{
-        name: 'PBES2Algorithms.params.salt',
+        name: 'PBES2Algorithms.salt',
         tagClass: asn1.Class.UNIVERSAL,
         type: asn1.Type.OCTETSTRING,
         constructed: false,
         capture: 'kdfSalt'
       }, {
-        name: 'PBES2Algorithms.params.iterationCount',
+        name: 'PBES2Algorithms.iterationCount',
         tagClass: asn1.Class.UNIVERSAL,
         type: asn1.Type.INTEGER,
         onstructed: true,
@@ -711,7 +711,7 @@ var rsassaPssParameterValidator = {
         type: asn1.Type.SEQUENCE,
         constructed: true,
         value: [{
-          name: 'rsapss.maskGenAlgorithm.AlgorithmIdentifier.params.algorithm',
+          name: 'rsapss.maskGenAlgorithm.AlgorithmIdentifier.algorithm',
           tagClass: asn1.Class.UNIVERSAL,
           type: asn1.Type.OID,
           constructed: false,

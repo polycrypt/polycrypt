@@ -72,17 +72,16 @@ Impl.extend({
                     this.die('Key must be a secret / symmetric key');
                 }
                 // Need to use a supported hash algorithm
-                if (!this.algorithm.hasOwnProperty('params') ||
-                    !this.algorithm.params.hasOwnProperty('hash')) {
+                if (!this.algorithm.hasOwnProperty('hash')) {
                     this.die('HMAC algorithm parameters must specify a hash function');
                     return;
                 }
-                switch (this.algorithm.params.hash) {
+                switch (this.algorithm.hash) {
                     case 'SHA-1':
                     case 'SHA-256':
                         break;
                     default:
-                        this.die('Unsupported hash algorithm ' + this.algorithm.params.hash);
+                        this.die('Unsupported hash algorithm ' + this.algorithm.hash);
                 }
                 break;
 
@@ -131,7 +130,7 @@ Impl.extend({
         switch (algoName) {
             case 'HMAC':
                 var hash;
-                switch (this.algorithm.params.hash) {
+                switch (this.algorithm.hash) {
                     case 'SHA-1':
                         hash = libpolycrypt.hmac_sha1(this.key.key, data);
                         break;

@@ -72,11 +72,7 @@ Impl.extend({
                     this.die('Key must be a secret / symmetric key');
                 }
                 // Required fields
-                if (!this.algorithm.hasOwnProperty('params')) {
-                    this.die('Algorithm parameters missing');
-                    return;
-                }
-                if (!this.algorithm.params.hasOwnProperty('iv')) {
+                if (!this.algorithm.hasOwnProperty('iv')) {
                     this.die('IV must be provided');
                     return;
                 }
@@ -88,19 +84,15 @@ Impl.extend({
                     this.die('Key must be a secret / symmetric key');
                 }
                 // Required fields
-                if (!this.algorithm.hasOwnProperty('params')) {
-                    this.die('Algorithm parameters missing');
-                    return;
-                }
-                if (!this.algorithm.params.hasOwnProperty('iv')) {
+                if (!this.algorithm.hasOwnProperty('iv')) {
                     this.die('IV must be provided');
                     return;
                 }
                 // Default values
-                if (!this.algorithm.params.hasOwnProperty('additionalData')) {
+                if (!this.algorithm.hasOwnProperty('additionalData')) {
                     this.algorithm.additionalData = new Uint8Array(0);
                 }
-                if (!this.algorithm.params.hasOwnProperty('tagLength')) {
+                if (!this.algorithm.hasOwnProperty('tagLength')) {
                     // XXX-SPEC: This should be 128, per RFC 5116
                     this.algorithm.tagLength = 0;
                 }
@@ -152,26 +144,26 @@ Impl.extend({
             case 'AES-CBC':
                 pt = libpolycrypt.decrypt_AES_CBC(
                     this.key.key,
-                    this.algorithm.params.iv,
+                    this.algorithm.iv,
                     data);
                 break;
 
             case 'AES-CTR':
                 pt = libpolycrypt.decrypt_AES_CTR(
                     this.key.key,
-                    this.algorithm.params.iv,
+                    this.algorithm.iv,
                     data);
                 break;
 
             case 'AES-GCM':
-                var tagBytes = this.algorithm.params.tagLength >> 3;
+                var tagBytes = this.algorithm.tagLength >> 3;
                 var CT = util.abvsplit(data, -tagBytes);
                 try{
                     pt = libpolycrypt.decrypt_AES_GCM(
                         this.key.key,
-                        this.algorithm.params.iv,
+                        this.algorithm.iv,
                         CT[0],
-                        this.algorithm.params.additionalData,
+                        this.algorithm.additionalData,
                         CT[1]
                     );
                 } catch (e) {

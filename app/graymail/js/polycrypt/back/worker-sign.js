@@ -71,17 +71,16 @@ Impl.extend({
                     this.die('Key must be a secret / symmetric key');
                 }
                 // Need to use a supported hash algorithm
-                if (!this.algorithm.hasOwnProperty('params') ||
-                    !this.algorithm.params.hasOwnProperty('hash')) {
+                if (!this.algorithm.hasOwnProperty('hash')) {
                     this.die('HMAC algorithm parameters must specify a hash function');
                     return;
                 }
-                switch (this.algorithm.params.hash) {
+                switch (this.algorithm.hash) {
                     case 'SHA-1':
                     case 'SHA-256':
                         break;
                     default:
-                        this.die('Unsupported hash algorithm ' + this.algorithm.params.hash);
+                        this.die('Unsupported hash algorithm ' + this.algorithm.hash);
                 }
                 break;
 
@@ -93,17 +92,16 @@ Impl.extend({
                     return
                 }
                 // Need to use a supported hash algorithm
-                if (!this.algorithm.hasOwnProperty('params') ||
-                    !this.algorithm.params.hasOwnProperty('hash')) {
+                if (!this.algorithm.hasOwnProperty('hash')) {
                     this.die('HMAC algorithm parameters must specify a hash function');
                     return;
                 }
-                switch (this.algorithm.params.hash) {
+                switch (this.algorithm.hash) {
                     case 'SHA-1':
                     case 'SHA-256':
                         break;
                     default:
-                        this.die('Unsupported hash algorithm ' + this.algorithm.params.hash);
+                        this.die('Unsupported hash algorithm ' + this.algorithm.hash);
                 }
 
                 break;
@@ -142,7 +140,7 @@ Impl.extend({
         var algoName = this.algoName(this.algorithm);
         switch (algoName) {
             case 'HMAC':
-                switch (this.algorithm.params.hash) {
+                switch (this.algorithm.hash) {
                     case 'SHA-1':
                         sig = libpolycrypt.hmac_sha1(this.key.key, data);
                         break;
@@ -154,7 +152,7 @@ Impl.extend({
                 break;
 
             case 'RSASSA-PKCS1-v1_5':
-                switch (this.algorithm.params.hash) {
+                switch (this.algorithm.hash) {
                     case 'SHA-1':
                         sig = libpolycrypt.sign_pkcs1_sha1(
                             util.hex2abv(this.key.key.n),

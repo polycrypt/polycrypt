@@ -7,7 +7,7 @@ TestArray.addTest(
         var length = 192;
         var op = window.polycrypt.generateKey({
             name: "AES-GCM",
-            params: { length: 192 }
+            length: 192
         });
         var that = this;
         op.onerror = function(e) {
@@ -33,10 +33,9 @@ TestArray.addTest(
     function() {
         var op = window.polycrypt.generateKey({
             name: "RSAES-PKCS1-v1_5",
-            params: { 
-                modulusLength: 512,
-                publicExponent: new Uint8Array([0x01, 0x00, 0x01])
-            }
+             
+            modulusLength: 512,
+            publicExponent: new Uint8Array([0x01, 0x00, 0x01])
         });
         var that = this;
         op.onerror = function(e) {
@@ -149,7 +148,7 @@ TestArray.addTest(
             var key = e.target.result;
             var op2 = window.polycrypt.sign({
                 name: "HMAC",
-                params: { hash: "SHA-256" }
+                hash: "SHA-256"
             }, key, tv.t4_data);
             op2.onerror = function(e) {
                 console.log("ERROR :: " + e.target.result);
@@ -255,7 +254,7 @@ TestArray.addTest(
             var key = e.target.result;
             var op2 = window.polycrypt.sign({
                 name: "RSASSA-PKCS1-v1_5",
-                params: { hash: "SHA-1" }
+                hash: "SHA-1"
             }, key, tv.t9_data);
             op2.onerror = function(e) {
                 console.log("ERROR :: " + e.target.result);
@@ -321,7 +320,7 @@ TestArray.addTest(
             var key = e.target.result;
             var op2 = window.polycrypt.sign({
                 name: "RSASSA-PKCS1-v1_5",
-                params: { hash: "SHA-256" }
+                hash: "SHA-256"
             }, key, tv.t11_data);
             op2.onerror = function(e) {
                 console.log("ERROR :: " + e.target.result);
@@ -381,7 +380,7 @@ TestArray.addTest(
             var key = e.target.result;
             var op2 = window.polycrypt.encrypt({
                 name: "AES-CBC",
-                params: { iv: tv.t13_iv }
+                iv: tv.t13_iv
             }, key, tv.t13_data);
             op2.onerror = function(e) {
                 console.log("ERROR :: " + e.target.result);
@@ -410,7 +409,7 @@ TestArray.addTest(
             var key = e.target.result;
             var op2 = window.polycrypt.decrypt({
                 name: "AES-CBC",
-                params: { iv: tv.t14_iv }
+                iv: tv.t14_iv
             }, key, tv.t14_data);
             op2.onerror = function(e) {
                 console.log("ERROR :: " + e.target.result);
@@ -439,7 +438,7 @@ TestArray.addTest(
             var key = e.target.result;
             var op2 = window.polycrypt.encrypt({
                 name: "AES-CTR",
-                params: { iv: tv.t15_iv }
+                iv: tv.t15_iv
             }, key, tv.t15_data);
             op2.onerror = function(e) {
                 console.log("ERROR :: " + e.target.result);
@@ -468,7 +467,7 @@ TestArray.addTest(
             var key = e.target.result;
             var op2 = window.polycrypt.decrypt({
                 name: "AES-CTR",
-                params: { iv: tv.t16_iv }
+                iv: tv.t16_iv
             }, key, tv.t16_data);
             op2.onerror = function(e) {
                 console.log("ERROR :: " + e.target.result);
@@ -498,16 +497,15 @@ TestArray.addTest(
             var op2 = window.polycrypt.deriveKey(
                 {
                     name: "PBKDF2",
-                    params: { 
-                        salt: tv.t17_salt,
-                        iterations: tv.t17_c,
-                        prf: "SHA-1"
-                    }
+                     
+                    salt: tv.t17_salt,
+                    iterations: tv.t17_c,
+                    prf: "SHA-1"
                 }, 
                 key,
                 { 
                     name: "HMAC",
-                    params: { length: tv.t17_dkLen * 8 }
+                    length: tv.t17_dkLen * 8
                 }
             );
             op2.onerror = function(e) {
@@ -548,11 +546,10 @@ TestArray.addTest(
             var key = e.target.result;
             var op2 = window.polycrypt.encrypt({
                 name: "AES-GCM",
-                params: { 
-                    iv: tv.t18_iv,
-                    additionalData: tv.t18_adata,
-                    tagLength: 128
-                }
+
+                iv: tv.t18_iv,
+                additionalData: tv.t18_adata,
+                tagLength: 128
             }, key, tv.t18_data);
             op2.onerror = function(e) {
                 console.log("ERROR :: " + e.target.result);
@@ -591,11 +588,10 @@ TestArray.addTest(
             );
             var op2 = window.polycrypt.decrypt({
                 name: "AES-GCM",
-                params: { 
-                    iv: tv.t19_iv,
-                    additionalData: tv.t19_adata,
-                    tagLength: 128
-                }
+                 
+                iv: tv.t19_iv,
+                additionalData: tv.t19_adata,
+                tagLength: 128
             }, key, t19_fulldata);
             op2.onerror = function(e) {
                 console.log("ERROR :: " + e.target.result);

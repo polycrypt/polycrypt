@@ -528,16 +528,14 @@ function deriveKey() {
 			/* Derive a shared key using PBKDF2 and SHA-1 */
 			var deriveKeyOp = defaultapi.deriveKey({
 				name: "PBKDF2",
-				params: {
-					salt: generatedSalt,
-					iterations: 2048,
-					prf: "SHA-1"
-					}
+
+				salt: generatedSalt,
+				iterations: 2048,
+				prf: "SHA-1"
 				}, key, {
 					name : "AES-GCM",
-					params : {
-						length : 128
-					}
+
+					length : 128
 				}, true, [ "encrypt", "decrypt" ]);
 
 				deriveKeyOp.onerror = function(e) {
@@ -590,11 +588,10 @@ var encrypt = function(text) {
 
     var encryptOp = defaultapi.encrypt({
         name: "AES-GCM",
-        params: {
-            iv: myIv,
-            additionalData: additional,
-            tagLength: 128
-        }
+
+        iv: myIv,
+        additionalData: additional,
+        tagLength: 128
     }, derivedKey, data);
             
     encryptOp.onerror = function(e) {
@@ -623,11 +620,10 @@ var decrypt = function(text) {
 
     var decryptOp = defaultapi.decrypt({
         name: "AES-GCM",
-        params: {
-            iv: util.hex2abv(vals[0]),
-            additionalData: util.hex2abv(vals[2]),
-            tagLength: 128
-        }
+
+        iv: util.hex2abv(vals[0]),
+        additionalData: util.hex2abv(vals[2]),
+        tagLength: 128
     }, derivedKey, util.hex2abv(vals[1]));
     
     decryptOp.onerror = function(e) {

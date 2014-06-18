@@ -36,17 +36,17 @@ Impl.extend({
             case "AES-CTR":
             case "AES-CBC":
             case "AES-GCM":
-                if (!algorithm.params || !algorithm.params.hasOwnProperty('length')) {
+                if (!algorithm.hasOwnProperty('length')) {
                     this.die('Key length must be provided');
                     return;
                 }
-                var length = algorithm.params.length;
+                var length = algorithm.length;
                 if ((length != 128) && (length != 192) && (length != 256)) {
                     this.die('Invalid AES key length ' + length);
                     return;
                 }
                 type = "secret";
-                bareKey = libpolycrypt.random(algorithm.params.length >> 3);
+                bareKey = libpolycrypt.random(algorithm.length >> 3);
                 var key = {
                     type: type,
                     extractable: extractable,
@@ -62,13 +62,13 @@ Impl.extend({
             case "RSASSA-PKCS1-v1_5":
             case "RSA-OAEP":
             case "RSA-PSS":
-                if (!algorithm.params || !algorithm.params.hasOwnProperty('modulusLength') ||
-                    !algorithm.params.hasOwnProperty('publicExponent')) {
+                if (!algorithm.hasOwnProperty('modulusLength') ||
+                    !algorithm.hasOwnProperty('publicExponent')) {
                     this.die('Modulus length and public exponent must be provided');
                     return;
                 }
-                var length = algorithm.params.modulusLength;
-                var e = util.abv2hex(algorithm.params.publicExponent);
+                var length = algorithm.modulusLength;
+                var e = util.abv2hex(algorithm.publicExponent);
                 var rsa = libpolycrypt.rsa_generate(length, e);
                 // Store key values as hex strings
                 bareKey = {};
@@ -101,11 +101,11 @@ Impl.extend({
                 break;
 
             case "HMAC":
-                if (!algorithm.params || !algorithm.params.hasOwnProperty('length')) {
+                if (!algorithm.hasOwnProperty('length')) {
                     this.die('Key length must be provided');
                     return;
                 }
-                var length = algorithm.params.length;
+                var length = algorithm.length;
                 type = "secret";
                 bareKey = libpolycrypt.random(length >> 3);
                 var key = {
