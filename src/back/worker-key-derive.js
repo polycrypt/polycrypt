@@ -6,6 +6,8 @@ importScripts('./lib/CryptoJS/cipher-core-min.js');
 importScripts('./lib/CryptoJS/aes-min.js');
 importScripts('./lib/CryptoJS/sha1-min.js');
 importScripts('./lib/CryptoJS/sha256-min.js');
+importScripts('./lib/CryptoJS/sha384-min.js');
+importScripts('./lib/CryptoJS/sha512-min.js');
 importScripts('./lib/CryptoJS/hmac-min.js');
 importScripts('./lib/CryptoJS/pbkdf2-min.js');
 // Crypto glue
@@ -93,6 +95,20 @@ Impl.extend({
                     );
                 } else if (prf === "SHA-256") {
                     keyData = libpolycrypt.pbkdf2_sha256(
+                        rawKey.key,
+                        algorithm.params.salt,
+                        algorithm.params.iterations,
+                        keyLength >> 3
+                    );
+                } else if (prf === "SHA-384") {
+                    keyData = libpolycrypt.pbkdf2_sha384(
+                        rawKey.key,
+                        algorithm.params.salt,
+                        algorithm.params.iterations,
+                        keyLength >> 3
+                    );
+                } else if (prf === "SHA-512") {
+                    keyData = libpolycrypt.pbkdf2_sha512(
                         rawKey.key,
                         algorithm.params.salt,
                         algorithm.params.iterations,

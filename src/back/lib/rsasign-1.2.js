@@ -53,6 +53,8 @@ var _RSASIGN_HASHHEXFUNC = [];
 // XXX:RLB: Make these use CryptoJS (to take strings/wordArrays and clean up dependencies)
 _RSASIGN_HASHHEXFUNC['sha1'] = function(s){ return CryptoJS.SHA1(s).toString(CryptoJS.enc.Hex); }
 _RSASIGN_HASHHEXFUNC['sha256'] = function(s){ return CryptoJS.SHA256(s).toString(CryptoJS.enc.Hex); }
+_RSASIGN_HASHHEXFUNC['sha384'] = function(s){ return CryptoJS.SHA384(s).toString(CryptoJS.enc.Hex); }
+_RSASIGN_HASHHEXFUNC['sha512'] = function(s) { return CryptoJS.SHA512(s).toString(CryptoJS.enc.Hex);}
 
 // XXX:RLB: Take raw string as input (don't do str2rstr_utf8)
 //_RSASIGN_HASHHEXFUNC['sha1'] = function(s){ return rstr2hex(rstr_sha1(s)); }
@@ -126,6 +128,13 @@ function _rsasign_signStringWithSHA256(s) {
   return _rsasign_signString(s, 'sha256');
 }
 
+function _rsasign_signStringWithSHA384(s) {
+  return _rsasign_signString(s, 'sha384');
+}
+
+function _rsasign_signStringWithSHA512(s) {
+  return _rsasign_signString(s, 'sha512');
+}
 // ========================================================================
 // Signature Verification
 // ========================================================================
@@ -193,7 +202,7 @@ function _rsasign_verifyString(sMsg, hSig) {
   var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
   var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
   
-  if (digestInfoAry.length == 0) return false;
+  if (digestInfoAry.length == 0) return false; 
   var algName = digestInfoAry[0];
   var diHashValue = digestInfoAry[1];
   var ff = _RSASIGN_HASHHEXFUNC[algName];
@@ -204,9 +213,13 @@ function _rsasign_verifyString(sMsg, hSig) {
 RSAKey.prototype.signString = _rsasign_signString;
 RSAKey.prototype.signStringWithSHA1 = _rsasign_signStringWithSHA1;
 RSAKey.prototype.signStringWithSHA256 = _rsasign_signStringWithSHA256;
+RSAKey.prototype.signStringWithSHA384 = _rsasign_signStringWithSHA384;
+RSAKey.prototype.signStringWithSHA512 = _rsasign_signStringWithSHA512;
 RSAKey.prototype.sign = _rsasign_signString;
 RSAKey.prototype.signWithSHA1 = _rsasign_signStringWithSHA1;
 RSAKey.prototype.signWithSHA256 = _rsasign_signStringWithSHA256;
+RSAKey.prototype.signWithSHA384 = _rsasign_signStringWithSHA384;
+RSAKey.prototype.signWithSHA512 = _rsasign_signStringWithSHA512;
 
 RSAKey.prototype.verifyString = _rsasign_verifyString;
 RSAKey.prototype.verifyHexSignatureForMessage = _rsasign_verifyHexSignatureForMessage;

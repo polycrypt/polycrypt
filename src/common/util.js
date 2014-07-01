@@ -97,14 +97,16 @@ var util = {
 
 
     /*** Conversion with UTF-16 strings ***/
-    str2abv: function util_str2abv(str) {
+    str2abv: function util_str2abv(str)
+    {
         var abv = new Uint16Array(str.length);
         for (var i=0; i<str.length; ++i) {
             abv[i] = str.charCodeAt(i);
         }
         return abv;
     },
-    abv2str: function util_abv2str(abv) {
+    abv2str: function util_abv2str(abv)
+    {
         if (abv.byteLength % 2 !== 0) {
             throw new Exception("UTF-16 decoding error");
         }
@@ -116,7 +118,21 @@ var util = {
         return str;
     },
 
-    
+    /*** Conversion with UTF-8 strings ***/
+    u82abv: function util_u82abv(str)
+    {
+        var abv = new Uint8Array(str.length);
+        for(var i = 0; i < str.length; ++i)
+        {
+            abv[i] = str.charCodeAt(i);
+        }
+        return abv;
+    },
+    abv2u8: function util_abv2u8(abv)
+    {
+        return new Uint8Array(abv.buffer, abv.byteOffset, abv.byteLength);
+    },
+
     /*** Convert between ArrayBufferView and Base64url encoding ***/
     b64a: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=",
     b64encode: function util_b64encode(abv) {
@@ -169,12 +185,6 @@ var util = {
         return new Uint8Array(u8);
     },
     
-    /*** Convert an arbitrary ArrayBufferView to a Uint8Array ***/
-    abv2u8: function util_abv2u8(abv) {
-        return new Uint8Array(abv.buffer, abv.byteOffset, abv.byteLength);
-    },
-
-
     /*** Join or split ArrayBufferViews ***/
     abvcat: function util_abvcat(abv1, abv2) {
         var abv = new Uint8Array(abv1.byteLength + abv2.byteLength);
