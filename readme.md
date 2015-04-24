@@ -1,6 +1,8 @@
 PolyCrypt - A pure JS implementation of the WebCrypto API
 =========================================================
 
+*NOTE: This project is no longer maintained.*
+
 This project is an implementation of the W3C WebCrypto API. 
 
 For full details, see [our website](http://polycrypt.net/)
